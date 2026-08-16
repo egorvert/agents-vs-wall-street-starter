@@ -72,7 +72,7 @@ class HdBaselineTests(unittest.TestCase):
 
     def test_percentage_metric_uses_additive_percentage_points(self) -> None:
         comp = self.estimates["hd_comp_sales"]
-        self.assertAlmostEqual(comp.value, 5.3)
+        self.assertAlmostEqual(comp.value, 2.0)  # damped %-drift (16:45) — Rachel to review
         self.assertAlmostEqual(comp.trend, 4.3)
         self.assertEqual(comp.method, "seasonal_naive_additive_drift")
 
@@ -94,7 +94,7 @@ class HdBaselineTests(unittest.TestCase):
 
         comp = bands["hd_comp_sales"]
         self.assertAlmostEqual(comp.low, 1.0)
-        self.assertAlmostEqual(comp.high, 9.6)
+        self.assertAlmostEqual(comp.high, 3.0)  # damped %-drift (16:45) — Rachel to review
         self.assertEqual(comp.methods[0], "seasonal_naive_band")
 
     def test_band_serializes_to_the_closed_contract_e_shape(self) -> None:

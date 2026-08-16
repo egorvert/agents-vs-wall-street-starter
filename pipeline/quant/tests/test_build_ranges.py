@@ -121,7 +121,7 @@ class RangeDocumentTests(unittest.TestCase):
         self.assertAlmostEqual(ranges["hd_adj_eps"]["base"], 4.68 * (4.68 / 4.67))
         self.assertEqual(ranges["hd_comp_sales"]["base"], 1.5)
         self.assertEqual(ranges["hd_comp_sales"]["low"], 0.0)
-        self.assertEqual(ranges["hd_comp_sales"]["high"], 9.6)
+        self.assertEqual(ranges["hd_comp_sales"]["high"], 3.0)  # damped %-drift (16:45) — Rachel to review
         self.assertIn("guidance_upper_bias", ranges["hd_comp_sales"]["methods"])
         self.assertIn("yoy_trend_band", ranges["hd_net_sales"]["notes"])
 
@@ -166,7 +166,7 @@ class RangeDocumentTests(unittest.TestCase):
             as_of="2026-08-16",
         )
         comp = next(item for item in document["ranges"] if item["metric_id"] == "hd_comp_sales")
-        self.assertAlmostEqual(comp["base"], 5.3)
+        self.assertAlmostEqual(comp["base"], 2.0)  # damped %-drift (16:45) — Rachel to review
         self.assertIn("guidance_upper_bias", comp["notes"])
 
     def test_write_ranges_is_byte_stable(self) -> None:

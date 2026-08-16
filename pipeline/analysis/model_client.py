@@ -15,7 +15,7 @@ from typing import Any, Callable, Protocol
 from openai import OpenAI, OpenAIError
 
 
-DEFAULT_MODEL = "gpt-5.6-terra"
+DEFAULT_MODEL = "gpt-5.6-sol"  # tier-up 16:25: was terra
 DEFAULT_REASONING_EFFORT = "low"
 EventLogger = Callable[[dict[str, Any]], None]
 

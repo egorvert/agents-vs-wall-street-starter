@@ -31,9 +31,9 @@ LAST_REPORT_DATE = {
     "DE": "2026-05-28",   # Q2 FY2026 results
 }
 
-WORKER_MODEL = "gpt-5.6-luna"
-MERGE_MODEL = "gpt-5.6-terra"
-CUSTODIAN_MODEL = "gpt-5.6-terra"  # basis errors swamp modelling gains
+WORKER_MODEL = "gpt-5.6-terra"   # tier-up 16:25: was luna
+MERGE_MODEL = "gpt-5.6-sol"      # tier-up 16:25: was terra
+CUSTODIAN_MODEL = "gpt-5.6-sol"  # basis errors swamp modelling gains
 
 # out/<cid>/research/ layout
 DOSSIER_NAME = "dossier.md"

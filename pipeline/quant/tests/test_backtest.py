@@ -127,10 +127,10 @@ class BacktestConfigurationTests(unittest.TestCase):
     def test_builds_baselines_current_range_and_fixed_blends(self) -> None:
         configs, ranges, proxy_kinds = build_case_configurations(self.case)
         metric = "hd_comp_sales"
-        self.assertEqual(configs["b0_seasonal"][metric], 5.0)
+        self.assertEqual(configs["b0_seasonal"][metric], 2.0)  # damped %-drift (16:45) — Rachel to review
         self.assertEqual(configs["b1_anchor"][metric], 1.0)
         self.assertEqual(configs["current_ranges_base"][metric], 1.5)
-        self.assertEqual(configs["blend_b1_25"][metric], 4.0)
+        self.assertEqual(configs["blend_b1_25"][metric], 1.75)  # damped %-drift (16:45) — Rachel to review
         self.assertEqual(configs["blend_b1_50"][metric], 3.0)
         self.assertEqual(configs["blend_b1_75"][metric], 2.0)
         self.assertEqual((ranges[metric]["low"], ranges[metric]["high"]), (0.0, 9.0))
@@ -141,10 +141,10 @@ class BacktestConfigurationTests(unittest.TestCase):
         summaries = {item.config_id: item for item in result.summaries}
         self.assertEqual(result.event_ids, ("HD-FY2026Q2-synthetic",))
         self.assertEqual(len(result.metrics), 6)
-        self.assertEqual(summaries["b0_seasonal"].mean_official_score, 3.0)
+        self.assertEqual(summaries["b0_seasonal"].mean_official_score, 0.0)  # damped %-drift (16:45) — Rachel to review
         self.assertEqual(summaries["b1_anchor"].mean_official_score, 1.0)
         self.assertEqual(summaries["current_ranges_base"].mean_official_score, 0.5)
-        self.assertEqual(summaries["blend_b1_75"].mean_official_score, 0.0)
+        self.assertEqual(summaries["blend_b1_75"].mean_official_score, 0.75)  # damped %-drift (16:45) — Rachel to review
         self.assertEqual(summaries["blend_b1_75"].win_rate_vs_proxy, 1.0)
         self.assertEqual(summaries["blend_b1_50"].tie_rate_vs_proxy, 1.0)
         self.assertEqual(result.proxy_usage[0].kind, "guidance_midpoint")

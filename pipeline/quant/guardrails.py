@@ -196,7 +196,15 @@ def seasonal_naive_for_series(series: dict, target_period: str) -> SeasonalNaive
             method = "seasonal_naive_trailing_yoy"
         else:
             trend = latest_value - previous_value
-            forecast = latest_value + trend
+            applied = trend
+            if series["unit"] == "%":
+                # Damp percent-metric drift: a -3.3 -> +1.0 comp-sales recovery
+                # must not extrapolate to +5.3. Cap the APPLIED drift at the
+                # larger of |latest| and 1 point; `trend` keeps the raw swing so
+                # the band still widens on it — uncertainty preserved, point damped.
+                cap = max(abs(latest_value), 1.0)
+                applied = math.copysign(min(abs(trend), cap), trend) if trend else 0.0
+            forecast = latest_value + applied
             method = "seasonal_naive_additive_drift"
 
     if not math.isfinite(forecast):
