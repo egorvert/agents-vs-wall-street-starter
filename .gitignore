@@ -11,3 +11,6 @@ submission/*.xlsx
 
 # PyCharm Maddness
 .idea/
+
+# Pipeline runtime outputs (fixtures/ is the committed sample data)
+/out/
