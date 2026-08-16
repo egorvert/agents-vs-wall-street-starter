@@ -312,6 +312,21 @@ def _render_context(
         sentences = sentences[:-1]
         lines[2] = " ".join(sentences)
         rendered = "\n".join(lines).rstrip() + "\n"
+    # second backstop: drop the LAST risk bullet (each is preceded by a blank
+    # line and followed only by its citations) until the file fits; keep at
+    # least one risk, never touch the cited metric outlooks
+    while _word_count(rendered) > 600:
+        header = next((i for i, l in enumerate(lines) if l == "## Risks and counterevidence"), None)
+        if header is None:
+            break
+        bullets = [i for i, l in enumerate(lines) if i > header and l.startswith("- ")]
+        if len(bullets) <= 1:
+            break
+        cut = bullets[-1]
+        if lines[cut - 1] == "":
+            cut -= 1
+        lines = lines[:cut]
+        rendered = "\n".join(lines).rstrip() + "\n"
     if _word_count(rendered) > 600:
         raise AnalysisError(f"context.md exceeds 600 words ({_word_count(rendered)})")
     return rendered
@@ -413,16 +428,25 @@ def _render_news(
         published_at = max(item.published_at for item in evidence)
         materialized.append((published_at, headline.strip(), summary.strip(), evidence, impacts))
     materialized.sort(key=lambda item: (item[0], item[1]), reverse=True)
-    lines = [f"# {company['company']} — news since the last filing"]
-    for published_at, headline, summary, evidence, impacts in materialized:
-        lines.extend(["", f"## {published_at} — {headline}", "", summary])
-        lines.extend(_citation_lines(evidence, indent=""))
-        lines.append("")
-        for impact in impacts:
-            lines.append(
-                f"- `{impact['metric_id']}`: {DIRECTION_SYMBOLS[impact['direction']]}"
-            )
-    rendered = "\n".join(lines).rstrip() + "\n"
+
+    def _render_items(items) -> str:
+        lines = [f"# {company['company']} — news since the last filing"]
+        for published_at, headline, summary, evidence, impacts in items:
+            lines.extend(["", f"## {published_at} — {headline}", "", summary])
+            lines.extend(_citation_lines(evidence, indent=""))
+            lines.append("")
+            for impact in impacts:
+                lines.append(
+                    f"- `{impact['metric_id']}`: {DIRECTION_SYMBOLS[impact['direction']]}"
+                )
+        return "\n".join(lines).rstrip() + "\n"
+
+    rendered = _render_items(materialized)
+    # deterministic backstop for the 600-word contract cap: items are sorted
+    # newest-first, so drop the OLDEST items until the file fits
+    while _word_count(rendered) > 600 and len(materialized) > 1:
+        materialized = materialized[:-1]
+        rendered = _render_items(materialized)
     if _word_count(rendered) > 600:
         raise AnalysisError(f"news.md exceeds 600 words ({_word_count(rendered)})")
     return rendered

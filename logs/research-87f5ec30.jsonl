@@ -1,0 +1,11 @@
+{"ts": "2026-08-16T17:05:56", "kind": "run_start", "run_id": "87f5ec30", "companies": ["HD"], "cutoff": "2026-08-16", "models": {"custodian": "gpt-5.6-sol", "worker": "gpt-5.6-terra"}}
+{"ts": "2026-08-16T17:05:56", "kind": "company_start", "company_id": "HD", "metrics": ["hd_net_sales", "hd_adj_eps", "hd_comp_sales"]}
+{"ts": "2026-08-16T17:07:26", "kind": "worker_done", "company_id": "HD", "worker": "w1_custodian", "facts": 34, "claims": 4}
+{"ts": "2026-08-16T17:07:26", "kind": "worker_done", "company_id": "HD", "worker": "w2_guidance", "facts": 1, "claims": 5}
+{"ts": "2026-08-16T17:07:26", "kind": "worker_done", "company_id": "HD", "worker": "w3_operating_model", "facts": 3, "claims": 4}
+{"ts": "2026-08-16T17:07:26", "kind": "worker_done", "company_id": "HD", "worker": "w4_demand_peers", "facts": 0, "claims": 3}
+{"ts": "2026-08-16T17:07:53", "kind": "challenges", "company_id": "HD", "kept": 4, "severities": ["low", "medium", "medium", "medium"]}
+{"ts": "2026-08-16T17:07:53", "kind": "coverage", "company_id": "HD", "coverage": {"hd_net_sales": {"historical_points": 11, "historical_ok": true, "guidance_present": false, "driver_claims": 3, "external_corroboration": true, "counterevidence_present": true}, "hd_adj_eps": {"historical_points": 14, "historical_ok": true, "guidance_present": false, "driver_claims": 2, "external_corroboration": true, "counterevidence_present": true}, "hd_comp_sales": {"historical_points": 9, "historical_ok": true, "guidance_present": true, "driver_claims": 2, "external_corroboration": true, "counterevidence_present": true}}}
+{"ts": "2026-08-16T17:08:07", "kind": "prose_dropped", "company_id": "HD", "section": "guidance_overview", "sentence": "Management reaffirmed its fiscal FY2026 guidance on May 19, 2026.", "new_numbers": ["2026."]}
+{"ts": "2026-08-16T17:08:07", "kind": "dossier_written", "company_id": "HD", "path": "/Users/egorvert/Developer/agents-vs-wall-street-starter/out/HD/research/dossier.md", "chars": 31500, "facts": 35}
+{"ts": "2026-08-16T17:08:07", "kind": "run_done", "ok": 1, "total": 1}

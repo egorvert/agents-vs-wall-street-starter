@@ -1,0 +1,11 @@
+{"ts": "2026-08-16T17:12:10", "kind": "run_start", "run_id": "a4d09439", "companies": ["HAS"], "cutoff": "2026-08-16", "models": {"custodian": "gpt-5.6-sol", "worker": "gpt-5.6-terra"}}
+{"ts": "2026-08-16T17:12:10", "kind": "company_start", "company_id": "HAS", "metrics": ["has_net_fees", "has_preexc_eps", "has_preexc_op"]}
+{"ts": "2026-08-16T17:13:33", "kind": "worker_done", "company_id": "HAS", "worker": "w1_custodian", "facts": 15, "claims": 5}
+{"ts": "2026-08-16T17:13:33", "kind": "worker_done", "company_id": "HAS", "worker": "w2_guidance", "facts": 2, "claims": 4}
+{"ts": "2026-08-16T17:13:33", "kind": "worker_done", "company_id": "HAS", "worker": "w3_operating_model", "facts": 2, "claims": 4}
+{"ts": "2026-08-16T17:13:33", "kind": "worker_done", "company_id": "HAS", "worker": "w4_demand_peers", "facts": 0, "claims": 4}
+{"ts": "2026-08-16T17:13:54", "kind": "challenges", "company_id": "HAS", "kept": 2, "severities": ["medium", "medium"]}
+{"ts": "2026-08-16T17:13:54", "kind": "coverage", "company_id": "HAS", "coverage": {"has_net_fees": {"historical_points": 4, "historical_ok": false, "guidance_present": false, "driver_claims": 3, "external_corroboration": true, "counterevidence_present": true}, "has_preexc_eps": {"historical_points": 6, "historical_ok": false, "guidance_present": false, "driver_claims": 1, "external_corroboration": true, "counterevidence_present": true}, "has_preexc_op": {"historical_points": 5, "historical_ok": false, "guidance_present": true, "driver_claims": 4, "external_corroboration": true, "counterevidence_present": true}}}
+{"ts": "2026-08-16T17:14:05", "kind": "prose_dropped", "company_id": "HAS", "section": "historical_overview", "sentence": "Coverage is limited and uneven: no FY2026 full-year reported values or H1 FY2026 pre-exceptional basic EPS are supplied, and the operating-profit history contains a period-label concern for FY2024H1.", "new_numbers": ["1."]}
+{"ts": "2026-08-16T17:14:05", "kind": "dossier_written", "company_id": "HAS", "path": "/Users/egorvert/Developer/agents-vs-wall-street-starter/out/HAS/research/dossier.md", "chars": 31211, "facts": 16}
+{"ts": "2026-08-16T17:14:05", "kind": "run_done", "ok": 1, "total": 1}
