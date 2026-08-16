@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
+from statistics import median
 
 from pipeline.quant.extract_timeseries import canonical_period_type
 
@@ -205,8 +206,7 @@ def seasonal_naive_for_series(series: dict, target_period: str) -> SeasonalNaive
     )
 
 
-def seasonal_naive_baselines(timeseries: dict, target_period: str) -> tuple[SeasonalNaiveEstimate, ...]:
-    """Compute one target-period B0 estimate for every matching metric series."""
+def _matching_series(timeseries: dict, target_period: str) -> tuple[str, tuple[dict, ...]]:
     if not isinstance(timeseries, dict):
         raise GuardrailError("timeseries must be an object")
     series_list = timeseries.get("series")
@@ -224,18 +224,25 @@ def seasonal_naive_baselines(timeseries: dict, target_period: str) -> tuple[Seas
         raise GuardrailError(f"no {target_type} series available for target {target_period}")
 
     seen_metrics: set[str] = set()
-    estimates = []
     for series in matching:
         metric_id = series.get("metric_id")
         if metric_id in seen_metrics:
             raise GuardrailError(f"duplicate {target_type} series for metric {metric_id!r}")
         seen_metrics.add(metric_id)
-        estimates.append(seasonal_naive_for_series(series, target_period))
-    return tuple(estimates)
+    return target_type, tuple(matching)
+
+
+def seasonal_naive_baselines(timeseries: dict, target_period: str) -> tuple[SeasonalNaiveEstimate, ...]:
+    """Compute one target-period B0 estimate for every matching metric series."""
+    _, matching = _matching_series(timeseries, target_period)
+    return tuple(seasonal_naive_for_series(series, target_period) for series in matching)
 
 
 def _minimum_band_half_width(
-    estimate: SeasonalNaiveEstimate,
+    *,
+    metric_id: str,
+    unit: str,
+    base: float,
     explicit_minimum: float | None,
 ) -> float:
     if explicit_minimum is not None:
@@ -247,12 +254,12 @@ def _minimum_band_half_width(
         ):
             raise GuardrailError("minimum_half_width must be a positive finite number")
         return float(explicit_minimum)
-    if estimate.unit == "%":
+    if unit == "%":
         return 0.5
-    proxy = abs(estimate.value) * 0.005
+    proxy = abs(base) * 0.005
     if proxy == 0:
         raise GuardrailError(
-            f"{estimate.metric_id}: zero B0 requires an explicit money/EPS minimum_half_width"
+            f"{metric_id}: zero base requires an explicit money/EPS minimum_half_width"
         )
     return proxy
 
@@ -272,7 +279,12 @@ def seasonal_naive_band(
         raise GuardrailError("seasonal_naive_band requires a SeasonalNaiveEstimate")
     latest_value = float(estimate.evidence[-1].value)
     observed_move = abs(estimate.value - latest_value)
-    minimum = _minimum_band_half_width(estimate, minimum_half_width)
+    minimum = _minimum_band_half_width(
+        metric_id=estimate.metric_id,
+        unit=estimate.unit,
+        base=estimate.value,
+        explicit_minimum=minimum_half_width,
+    )
     half_width = max(observed_move, minimum)
     low = estimate.value - half_width
     high = estimate.value + half_width
@@ -308,4 +320,93 @@ def seasonal_naive_bands(
             minimum_half_width=overrides.get(estimate.metric_id),
         )
         for estimate in seasonal_naive_baselines(timeseries, target_period)
+    )
+
+
+def yoy_trend_band_for_series(
+    series: dict,
+    target_period: str,
+    *,
+    minimum_half_width: float | None = None,
+) -> GuardrailBand:
+    """Build a robust YoY-trend band from multiple like-for-like changes.
+
+    At least three comparable periods (two changes) are required. The median
+    historical change sets the base; applying every observed change to the latest
+    value creates the low/high scenario envelope. Percentages and non-positive
+    levels use additive changes, while consistently positive levels use growth.
+    """
+    required = ("metric_id", "unit", "basis", "period_type")
+    missing = [field for field in required if not series.get(field)]
+    if missing:
+        raise GuardrailError(f"series is missing required fields {missing}")
+    comparable = _validated_points(series, target_period)
+    if len(comparable) < 3:
+        raise GuardrailError(
+            f"{series['metric_id']}: YoY trend requires at least 3 comparable periods; "
+            f"found {len(comparable)}"
+        )
+
+    values = [float(point["value"]) for point in comparable]
+    latest = values[-1]
+    use_growth = series["unit"] != "%" and all(value > 0 for value in values)
+    if use_growth:
+        changes = [current / previous - 1.0 for previous, current in zip(values, values[1:])]
+        central_change = float(median(changes))
+        scenarios = [latest * (1.0 + change) for change in changes]
+        base = latest * (1.0 + central_change)
+        detail_method = "yoy_trend_median_growth"
+        change_label = "growth"
+    else:
+        changes = [current - previous for previous, current in zip(values, values[1:])]
+        central_change = float(median(changes))
+        scenarios = [latest + change for change in changes]
+        base = latest + central_change
+        detail_method = "yoy_trend_median_change"
+        change_label = "change"
+
+    if not all(math.isfinite(value) for value in (*changes, *scenarios, base)):
+        raise GuardrailError(f"{series['metric_id']}: YoY trend calculation is not finite")
+    minimum = _minimum_band_half_width(
+        metric_id=series["metric_id"],
+        unit=series["unit"],
+        base=base,
+        explicit_minimum=minimum_half_width,
+    )
+    low = min(min(scenarios), base - minimum)
+    high = max(max(scenarios), base + minimum)
+    evidence = tuple(EvidencePoint.from_point(point) for point in comparable)
+    return GuardrailBand(
+        metric_id=series["metric_id"],
+        unit=series["unit"],
+        basis=series["basis"],
+        low=low,
+        base=base,
+        high=high,
+        methods=("yoy_trend_band", detail_method),
+        evidence=evidence,
+        notes=(
+            f"{target_period} median YoY {change_label} {central_change:g} from "
+            f"{len(changes)} point-in-time changes; envelope uses every observed change "
+            f"and minimum half-width {minimum:g}"
+        ),
+    )
+
+
+def yoy_trend_bands(
+    timeseries: dict,
+    target_period: str,
+    *,
+    minimum_half_widths: dict[str, float] | None = None,
+) -> tuple[GuardrailBand, ...]:
+    """Build one YoY-trend band for every target-period metric series."""
+    overrides = minimum_half_widths or {}
+    _, matching = _matching_series(timeseries, target_period)
+    return tuple(
+        yoy_trend_band_for_series(
+            series,
+            target_period,
+            minimum_half_width=overrides.get(series["metric_id"]),
+        )
+        for series in matching
     )

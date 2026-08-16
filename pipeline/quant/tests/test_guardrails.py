@@ -11,6 +11,8 @@ from pipeline.quant.guardrails import (
     seasonal_naive_baselines,
     seasonal_naive_bands,
     seasonal_naive_for_series,
+    yoy_trend_band_for_series,
+    yoy_trend_bands,
 )
 
 
@@ -104,6 +106,10 @@ class HdBaselineTests(unittest.TestCase):
             set(output["evidence"][0]),
             {"source", "published_at", "quote"},
         )
+
+    def test_hd_fixture_honestly_lacks_independent_trend_history(self) -> None:
+        with self.assertRaisesRegex(GuardrailError, "requires at least 3 comparable periods"):
+            yoy_trend_bands(self.timeseries, "FY2026Q2")
 
 
 class SeasonalNaiveRulesTests(unittest.TestCase):
@@ -224,6 +230,107 @@ class SeasonalNaiveRulesTests(unittest.TestCase):
             with self.subTest(width=width):
                 with self.assertRaisesRegex(GuardrailError, "positive finite"):
                     seasonal_naive_band(estimate, minimum_half_width=width)
+
+
+class YoyTrendBandTests(unittest.TestCase):
+    def test_positive_levels_use_median_growth_and_observed_envelope(self) -> None:
+        data = series(
+            [
+                point("FY2023Q2", 100.0),
+                point("FY2024Q2", 110.0),
+                point("FY2025Q2", 132.0),
+            ]
+        )
+        band = yoy_trend_band_for_series(data, "FY2026Q2")
+        self.assertAlmostEqual(band.base, 132.0 * 1.15)
+        self.assertAlmostEqual(band.low, 132.0 * 1.10)
+        self.assertAlmostEqual(band.high, 132.0 * 1.20)
+        self.assertEqual(band.methods, ("yoy_trend_band", "yoy_trend_median_growth"))
+        self.assertEqual(len(band.evidence), 3)
+
+    def test_percentages_use_median_point_change(self) -> None:
+        data = series(
+            [
+                point("FY2023Q2", -2.0),
+                point("FY2024Q2", 1.0),
+                point("FY2025Q2", 3.0),
+            ],
+            unit="%",
+        )
+        band = yoy_trend_band_for_series(data, "FY2026Q2")
+        self.assertEqual((band.low, band.base, band.high), (5.0, 5.5, 6.0))
+        self.assertEqual(band.methods, ("yoy_trend_band", "yoy_trend_median_change"))
+
+    def test_median_resists_one_growth_outlier(self) -> None:
+        data = series(
+            [
+                point("FY2022Q2", 100.0),
+                point("FY2023Q2", 110.0),
+                point("FY2024Q2", 121.0),
+                point("FY2025Q2", 242.0),
+            ]
+        )
+        band = yoy_trend_band_for_series(data, "FY2026Q2")
+        self.assertAlmostEqual(band.base, 242.0 * 1.10)
+        self.assertAlmostEqual(band.high, 242.0 * 2.0)
+
+    def test_identical_changes_expand_to_the_minimum_width(self) -> None:
+        data = series(
+            [
+                point("FY2023Q2", 100.0),
+                point("FY2024Q2", 110.0),
+                point("FY2025Q2", 121.0),
+            ]
+        )
+        band = yoy_trend_band_for_series(data, "FY2026Q2")
+        minimum = abs(band.base) * 0.005
+        self.assertAlmostEqual(band.low, band.base - minimum)
+        self.assertAlmostEqual(band.high, band.base + minimum)
+
+    def test_non_positive_levels_switch_to_additive_changes(self) -> None:
+        data = series(
+            [
+                point("FY2023Q2", -3.0),
+                point("FY2024Q2", -1.0),
+                point("FY2025Q2", 2.0),
+            ],
+            unit="GBp",
+        )
+        band = yoy_trend_band_for_series(data, "FY2026Q2")
+        self.assertEqual((band.low, band.base, band.high), (4.0, 4.5, 5.0))
+        self.assertEqual(band.methods[1], "yoy_trend_median_change")
+
+    def test_requires_two_independent_changes(self) -> None:
+        data = series([point("FY2024Q2", 100.0), point("FY2025Q2", 110.0)])
+        with self.assertRaisesRegex(GuardrailError, "requires at least 3 comparable periods"):
+            yoy_trend_band_for_series(data, "FY2026Q2")
+
+    def test_group_builder_keeps_hays_period_types_separate(self) -> None:
+        fy = series(
+            [point("FY2023", 100.0), point("FY2024", 110.0), point("FY2025", 121.0)],
+            metric_id="has_net_fees",
+            unit="GBPm",
+            period_type="FY",
+        )
+        h1 = series(
+            [point("FY2023H1", 40.0), point("FY2024H1", 45.0), point("FY2025H1", 50.0)],
+            metric_id="has_net_fees",
+            unit="GBPm",
+            period_type="H1",
+        )
+        bands = yoy_trend_bands({"series": [fy, h1]}, "FY2026")
+        self.assertEqual(len(bands), 1)
+        self.assertEqual(tuple(point.period for point in bands[0].evidence), ("FY2023", "FY2024", "FY2025"))
+
+    def test_trend_band_serializes_to_contract_e_fields(self) -> None:
+        data = series(
+            [point("FY2023Q2", 100.0), point("FY2024Q2", 110.0), point("FY2025Q2", 121.0)]
+        )
+        output = yoy_trend_band_for_series(data, "FY2026Q2").as_range()
+        self.assertEqual(
+            set(output),
+            {"metric_id", "unit", "basis", "low", "base", "high", "methods", "evidence", "notes"},
+        )
 
 
 if __name__ == "__main__":
