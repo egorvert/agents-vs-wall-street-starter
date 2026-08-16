@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Search the supplied company documents and write a cited Markdown research note."""
+"""Search historical and snapshotted live evidence and write a cited research note."""
 
 from __future__ import annotations
 
@@ -15,7 +15,10 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_CONFIG = REPO_ROOT / "challenge" / "companies.json"
-DEFAULT_DOCUMENT_ROOT = REPO_ROOT / "challenge" / "offline-data"
+DEFAULT_DOCUMENT_ROOTS = (
+    REPO_ROOT / "challenge" / "offline-data",
+    REPO_ROOT / "challenge" / "live-data",
+)
 WORD_RE = re.compile(r"[a-z0-9]+", re.IGNORECASE)
 NUMBER_RE = re.compile(
     r"(?<![\w])(?:[$£€]\s*)?\(?-?\d(?:[\d,]*\d)?(?:\.\d+)?"
@@ -35,6 +38,7 @@ class Match:
     score: int
     excerpt: str
     numbers: tuple[str, ...]
+    source_url: str = ""
 
 
 def parse_frontmatter(text: str) -> tuple[dict[str, object], str]:
@@ -133,14 +137,20 @@ def numbers_in(text: str) -> tuple[str, ...]:
     return tuple(unique[:12])
 
 
-def search_documents(directory: Path, query: str, limit: int = 5) -> list[Match]:
+def search_documents(directories: Path | list[Path] | tuple[Path, ...], query: str, limit: int = 5) -> list[Match]:
     terms = query_terms(query)
     phrase = re.sub(r"\s+", " ", query).strip().casefold()
     heap: list[tuple[int, str, int, Match]] = []
     serial = 0
 
+    roots = [directories] if isinstance(directories, Path) else list(directories)
     paths = sorted(
-        path for path in directory.rglob("*.md") if path.name not in {"INDEX.md", "README.md"}
+        {
+            path
+            for directory in roots
+            for path in directory.rglob("*.md")
+            if path.name not in {"INDEX.md", "README.md"}
+        }
     )
     for path in paths:
         metadata, body = parse_frontmatter(path.read_text(encoding="utf-8"))
@@ -157,6 +167,18 @@ def search_documents(directory: Path, query: str, limit: int = 5) -> list[Match]
                 continue
             occurrences = sum(min(len(re.findall(rf"\b{re.escape(term)}\b", lowered)), 3) for term in matched)
             score = len(matched) * 20 + occurrences * 2 + (35 if phrase in lowered else 0)
+            document_type = str(metadata.get("document_type") or "Document")
+            if metadata.get("archive_kind") == "LIVE_EXTERNAL_EVIDENCE":
+                score += 8
+            score += {
+                "OFFICIAL_GUIDANCE": 30,
+                "COMPANY_HOSTED_CONSENSUS": 25,
+                "LIVE_INDICATOR": 12,
+                "INDUSTRY_FORECAST": 12,
+                "REGULATORY_UPDATE": 6,
+                "CORPORATE_NEWS": 4,
+                "EVENT_CALENDAR": -20,
+            }.get(document_type, 0)
             published_at = str(metadata.get("published_at") or "")
             year_match = re.match(r"(\d{4})", published_at)
             if year_match:
@@ -169,11 +191,12 @@ def search_documents(directory: Path, query: str, limit: int = 5) -> list[Match]
                 path=path,
                 title=title,
                 published_at=published_at,
-                document_type=str(metadata.get("document_type") or "Document").replace("_", " ").title(),
+                document_type=document_type.replace("_", " ").title(),
                 period=str(metadata.get("period") or ""),
                 score=score,
                 excerpt=excerpt,
                 numbers=numbers,
+                source_url=str(metadata.get("source_url") or ""),
             )
             serial += 1
             heapq.heappush(heap, (score, match.published_at, serial, match))
@@ -184,7 +207,7 @@ def search_documents(directory: Path, query: str, limit: int = 5) -> list[Match]
     selected: list[Match] = []
     per_document: dict[Path, int] = {}
     for match in ranked:
-        if per_document.get(match.path, 0) >= 2:
+        if per_document.get(match.path, 0) >= 1:
             continue
         selected.append(match)
         per_document[match.path] = per_document.get(match.path, 0) + 1
@@ -204,7 +227,7 @@ def render_note(
         f"**Challenge period:** {company['period']}  ",
         f"**Challenge metrics:** {metrics}",
         "",
-        "These are search results, not verified historical values or forecasts. Check every figure in context.",
+        "These are search results, not verified historical values or forecasts. Live evidence is a dated snapshot, not a continuously refreshed feed. Check every figure, period and cutoff in context.",
     ]
     for query in queries:
         lines.extend(["", f"## {query}", ""])
@@ -222,6 +245,12 @@ def render_note(
                     f"- **Published:** {match.published_at or 'Unknown'}",
                     f"- **Type:** {match.document_type}",
                     f"- **Period:** {match.period or 'Unknown'}",
+                ]
+            )
+            if match.source_url:
+                lines.append(f"- **Original source:** [{match.source_url}]({match.source_url})")
+            lines.extend(
+                [
                     f"- **Candidate figures in excerpt:** {', '.join(match.numbers) or 'None detected'}",
                     "",
                     "> " + textwrap.fill(match.excerpt, width=110).replace("\n", "\n> "),
@@ -236,8 +265,18 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--company", required=True, help="Company ticker or exact company name")
     parser.add_argument("--query", action="append", help="Search query; repeat for multiple queries")
     parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
-    parser.add_argument("--documents", type=Path, help="Company document directory; detected when omitted")
-    parser.add_argument("--document-root", type=Path, default=DEFAULT_DOCUMENT_ROOT)
+    parser.add_argument(
+        "--documents",
+        type=Path,
+        help="One company document directory; overrides automatic historical and live-source discovery",
+    )
+    parser.add_argument(
+        "--document-root",
+        dest="document_roots",
+        action="append",
+        type=Path,
+        help="Evidence root to search; repeat for multiple roots (defaults to offline-data and live-data)",
+    )
     parser.add_argument("--output", type=Path, help="Markdown output path")
     parser.add_argument("--max-results", type=int, default=5, help="Results per query")
     return parser
@@ -249,10 +288,21 @@ def main(argv: list[str] | None = None) -> int:
         raise SystemExit("--max-results must be between 1 and 20")
     try:
         company = load_company(args.config, args.company)
-        directory = args.documents or find_document_directory(args.document_root, company)
+        if args.documents:
+            directories = [args.documents]
+        else:
+            roots = args.document_roots or list(DEFAULT_DOCUMENT_ROOTS)
+            directories = [
+                find_document_directory(root, company)
+                for root in roots
+                if root.exists()
+            ]
+            if not directories:
+                searched = ", ".join(str(root) for root in roots)
+                raise ValueError(f"No evidence directories found under: {searched}")
         queries = args.query or [str(metric["label"]) for metric in company.get("metrics", [])]
         output = args.output or REPO_ROOT / "research" / f"{str(company['ticker']).replace(':', '-')}.md"
-        results = {query: search_documents(directory, query, args.max_results) for query in queries}
+        results = {query: search_documents(directories, query, args.max_results) for query in queries}
         output.parent.mkdir(parents=True, exist_ok=True)
         output.write_text(render_note(company, queries, results, output), encoding="utf-8")
     except (FileNotFoundError, KeyError, ValueError, json.JSONDecodeError) as exc:

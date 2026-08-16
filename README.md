@@ -4,7 +4,7 @@ Agents vs Wall Street is a one-day hackathon presented by Primer, OpenStocks, AI
 
 The challenge covers four companies: Home Depot, Analog Devices, Hays plc and Deere & Company. Your agent forecasts three reported figures for each.
 
-The repository includes a frozen historical corpus of 1,139 filings, call-transcript sections and slide documents for the four known companies. Start at [challenge/offline-data/INDEX.md](challenge/offline-data/INDEX.md) or search the Markdown files directly.
+The repository includes a frozen historical corpus of 1,139 filings, call-transcript sections and slide documents for the four known companies, plus a separately dated snapshot of public company guidance and live external indicators. Start at [challenge/offline-data/INDEX.md](challenge/offline-data/INDEX.md) and [challenge/live-data/INDEX.md](challenge/live-data/INDEX.md), or search the Markdown files directly.
 
 Your agent should be able to do the research, make the financial judgements and produce completed OpenStocks workbooks with as little manual help as possible.
 
@@ -59,7 +59,7 @@ Run `npm install` and `npm run setup:entry` once. Complete the private `entry.js
 
 ## Optional document-search helper
 
-[`starter/search.py`](starter/search.py) is a small, dependency-free example of searching the supplied Markdown corpus and producing a cited research note. It does not make forecasts or edit a workbook.
+[`starter/search.py`](starter/search.py) is a small, dependency-free example of searching the historical corpus and dated live-evidence archive together, producing a cited research note. It does not make forecasts, browse the web or edit a workbook.
 
 ```bash
 python3 starter/search.py --company HD
@@ -71,7 +71,7 @@ Use `HD`, `ADI`, `HAS` or `DE` for the four challenge companies. The output cont
 ## Repository map
 
 ```text
-challenge/                 Companies, metrics, workbooks and historical documents
+challenge/                 Companies, metrics, workbooks, historical documents and live evidence
 architecture/index.html    Template for the required architecture explanation
 entry.template.json        Template for private team and agent details
 submission/                Put the four completed workbooks here

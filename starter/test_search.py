@@ -64,6 +64,30 @@ class SearchTests(unittest.TestCase):
             self.assertEqual(matches[0].path.name, "2026.md")
             self.assertIn("Worldwide net sales and revenues", matches[0].excerpt)
 
+    def test_search_combines_historical_and_live_evidence_directories(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            historical = root / "historical"
+            live = root / "live"
+            historical.mkdir()
+            live.mkdir()
+            (historical / "prior.md").write_text(
+                '---\ncompany: "Analog Devices"\nticker: "ADI"\npublished_at: "2025-05-20"\n'
+                'document_type: "FILING"\nperiod: "Q2 2025"\n---\n# Prior result\n\n'
+                "Adjusted gross margin was 69.4% in the prior-year quarter.\n",
+                encoding="utf-8",
+            )
+            (live / "guidance.md").write_text(
+                '---\ncompany: "Analog Devices"\nticker: "ADI"\npublished_at: "2026-05-20"\n'
+                'document_type: "OFFICIAL_GUIDANCE"\nperiod: "Q2 2026"\n---\n# Current result\n\n'
+                "Adjusted gross margin was 73.0% in the latest reported quarter.\n",
+                encoding="utf-8",
+            )
+
+            matches = search.search_documents([historical, live], "adjusted gross margin", limit=3)
+            self.assertEqual({match.path.parent for match in matches}, {historical, live})
+            self.assertEqual(matches[0].path.parent, live)
+
     def test_render_note_links_to_source_and_warns_results_are_unverified(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
@@ -80,6 +104,7 @@ class SearchTests(unittest.TestCase):
                 score=50,
                 excerpt="Net sales were $41.8 billion.",
                 numbers=("$41.8 billion",),
+                source_url="https://example.com/report",
             )
             company = {
                 "company": "Home Depot",
@@ -90,6 +115,7 @@ class SearchTests(unittest.TestCase):
             note = search.render_note(company, ["Net sales"], {"Net sales": [match]}, output)
             self.assertIn("not verified historical values or forecasts", note)
             self.assertIn("../documents/report.md", note)
+            self.assertIn("https://example.com/report", note)
             self.assertIn("$41.8 billion", note)
 
 
