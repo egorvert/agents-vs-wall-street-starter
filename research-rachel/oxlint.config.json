@@ -1,0 +1,13 @@
+{
+  "plugins": ["typescript", "react", "jsx-a11y", "nextjs", "react-perf", "vitest"],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "warn",
+    "perf": "warn"
+  },
+  "env": {
+    "browser": true,
+    "node": true
+  },
+  "ignorePatterns": ["apps/web/.next/**", "apps/web/next-env.d.ts"]
+}
