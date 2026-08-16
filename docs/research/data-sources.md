@@ -70,7 +70,7 @@ Host: www.sec.gov
 
 ```ts
 const SEC_HEADERS = {
-  "User-Agent": "WallStreetHackathon/1.0 (tools@brside.com)",
+  "User-Agent": "WallStreetHackathon/1.0 (contact@example.com)",
   "Accept-Encoding": "gzip, deflate",
 };
 ```
