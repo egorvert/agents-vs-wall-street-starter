@@ -80,3 +80,24 @@ At implementation time B1 scored `1.000` and the current ranges base scored `1.1
 The current base nevertheless won five of nine paired comparisons, showing why both the
 mean official score and paired outcomes remain visible. B0 scored `3.667`; this cyclical
 sample strongly favors the available guidance anchors over extrapolating the last YoY move.
+
+## Combined event sensitivity
+
+Run HD and ADI together to score 15 held-out metric observations. The generated results
+include `event_sensitivity`: for each configuration the runner removes one complete event
+at a time, recomputes the mean score, and records how often that configuration remains the
+winner. This is a sensitivity diagnostic, not training or model selection on the omitted
+answer.
+
+| Config | Full mean | Leave-one-event-out mean range | Wins across 6 omissions |
+| --- | ---: | ---: | ---: |
+| B0 seasonal | 3.255 | 3.152-3.462 | 0 |
+| B1 anchor/proxy | 0.933 | 0.917-1.000 | 6 |
+| Current ranges base | 1.099 | 1.000-1.174 | 0 |
+| B1 weight 25% | 3.145 | 3.014-3.408 | 0 |
+| B1 weight 50% | 2.925 | 2.739-3.227 | 0 |
+| B1 weight 75% | 2.061 | 1.660-2.298 | 0 |
+
+B1 remains the aggregate winner after every single-event omission. The current base still
+wins individual metrics, but the evidence does not support replacing the anchor or fitting
+regression coefficients to this small, heterogeneous sample.

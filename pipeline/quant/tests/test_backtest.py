@@ -216,6 +216,7 @@ class BacktestCliTests(unittest.TestCase):
             document = json.loads(output.read_text())
             self.assertEqual(len(document["configs"]), 6)
             self.assertEqual(len(document["configs_by_metric"]), 6)
+            self.assertEqual(document["event_sensitivity"], [])
             self.assertEqual(document["proxy_usage"][0]["kind"], "guidance_midpoint")
             self.assertEqual(len(document["metrics"]), 6)
             self.assertIn("blend_b1_75", result.stdout)
@@ -278,6 +279,30 @@ class CommittedAdiReplayTests(unittest.TestCase):
         self.assertAlmostEqual(
             summaries["current_ranges_base"].win_rate_vs_proxy,
             5 / 9,
+        )
+
+
+class CombinedHistoricalSensitivityTests(unittest.TestCase):
+    def test_leave_one_event_out_results_do_not_depend_on_one_quarter(self) -> None:
+        cases = []
+        for company, periods in (
+            ("HD", ("FY2023Q2", "FY2024Q2", "FY2025Q2")),
+            ("ADI", ("FY2023Q3", "FY2024Q3", "FY2025Q3")),
+        ):
+            case_root = REPO / "pipeline" / "quant" / "backtests" / company
+            cases.extend(load_backtest_case(case_root / period, REPO) for period in periods)
+
+        result = run_backtest(cases)
+        sensitivity = {item.config_id: item for item in result.event_sensitivity}
+
+        self.assertEqual(len(result.event_ids), 6)
+        self.assertEqual(len(result.metrics), 90)
+        self.assertEqual(len(sensitivity), 6)
+        self.assertEqual(sensitivity["b1_anchor"].event_count, 6)
+        self.assertEqual(sensitivity["b1_anchor"].winner_count, 6)
+        self.assertLess(
+            sensitivity["b1_anchor"].leave_one_event_out_mean_max,
+            sensitivity["current_ranges_base"].leave_one_event_out_mean_min,
         )
 
 

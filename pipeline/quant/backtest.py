@@ -8,6 +8,7 @@ import json
 import sys
 from dataclasses import dataclass
 from pathlib import Path
+from statistics import median
 from typing import Mapping, Sequence
 
 if __package__ in (None, ""):
@@ -54,10 +55,31 @@ class ProxyUsage:
 
 
 @dataclass(frozen=True)
+class EventSensitivity:
+    config_id: str
+    event_count: int
+    winner_count: int
+    leave_one_event_out_mean_min: float
+    leave_one_event_out_mean_median: float
+    leave_one_event_out_mean_max: float
+
+    def as_dict(self) -> dict:
+        return {
+            "config_id": self.config_id,
+            "event_count": self.event_count,
+            "winner_count": self.winner_count,
+            "leave_one_event_out_mean_min": self.leave_one_event_out_mean_min,
+            "leave_one_event_out_mean_median": self.leave_one_event_out_mean_median,
+            "leave_one_event_out_mean_max": self.leave_one_event_out_mean_max,
+        }
+
+
+@dataclass(frozen=True)
 class BacktestResult:
     event_ids: tuple[str, ...]
     summaries: tuple[ConfigSummary, ...]
     metric_summaries: tuple[tuple[str, ConfigSummary], ...]
+    event_sensitivity: tuple[EventSensitivity, ...]
     proxy_usage: tuple[ProxyUsage, ...]
     metrics: tuple[MetricEvaluation, ...]
 
@@ -70,6 +92,7 @@ class BacktestResult:
                 {"metric_id": metric_id, **summary.as_dict()}
                 for metric_id, summary in self.metric_summaries
             ],
+            "event_sensitivity": [item.as_dict() for item in self.event_sensitivity],
             "proxy_usage": [
                 {
                     "event_id": usage.event_id,
@@ -275,6 +298,45 @@ def evaluate_case(case: BacktestCase) -> tuple[tuple[MetricEvaluation, ...], tup
     return tuple(results), usage
 
 
+def summarize_event_sensitivity(
+    metrics: Sequence[MetricEvaluation],
+    event_ids: Sequence[str],
+) -> tuple[EventSensitivity, ...]:
+    """Report whether an aggregate winner depends on any single historical event."""
+    if len(event_ids) < 2:
+        return ()
+
+    means_by_config = {config_id: [] for config_id in CONFIG_ORDER}
+    winner_counts = {config_id: 0 for config_id in CONFIG_ORDER}
+    for omitted_event in event_ids:
+        omitted_means = {}
+        for config_id in CONFIG_ORDER:
+            remaining = [
+                metric
+                for metric in metrics
+                if metric.config_id == config_id and metric.event_id != omitted_event
+            ]
+            summary = summarize_config(remaining)
+            omitted_means[config_id] = summary.mean_official_score
+            means_by_config[config_id].append(summary.mean_official_score)
+        best = min(omitted_means.values())
+        for config_id, value in omitted_means.items():
+            if abs(value - best) <= 1e-12:
+                winner_counts[config_id] += 1
+
+    return tuple(
+        EventSensitivity(
+            config_id=config_id,
+            event_count=len(event_ids),
+            winner_count=winner_counts[config_id],
+            leave_one_event_out_mean_min=min(means_by_config[config_id]),
+            leave_one_event_out_mean_median=float(median(means_by_config[config_id])),
+            leave_one_event_out_mean_max=max(means_by_config[config_id]),
+        )
+        for config_id in CONFIG_ORDER
+    )
+
+
 def run_backtest(cases: Sequence[BacktestCase]) -> BacktestResult:
     if not cases:
         raise EvaluationError("backtest requires at least one historical event")
@@ -307,6 +369,7 @@ def run_backtest(cases: Sequence[BacktestCase]) -> BacktestResult:
         event_ids=tuple(event_ids),
         summaries=tuple(summaries),
         metric_summaries=tuple(metric_summaries),
+        event_sensitivity=summarize_event_sensitivity(metrics, event_ids),
         proxy_usage=tuple(proxy_usage),
         metrics=metrics,
     )
