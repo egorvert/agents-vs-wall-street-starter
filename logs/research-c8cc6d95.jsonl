@@ -1,0 +1,10 @@
+{"ts": "2026-08-16T17:32:18", "kind": "run_start", "run_id": "c8cc6d95", "companies": ["DE"], "cutoff": "2026-08-16", "models": {"custodian": "gpt-5.6-sol", "worker": "gpt-5.6-terra"}}
+{"ts": "2026-08-16T17:32:18", "kind": "company_start", "company_id": "DE", "metrics": ["de_net_sales", "de_eps_gaap", "de_ppa_op"]}
+{"ts": "2026-08-16T17:34:33", "kind": "worker_done", "company_id": "DE", "worker": "w1_custodian", "facts": 36, "claims": 4}
+{"ts": "2026-08-16T17:34:33", "kind": "worker_done", "company_id": "DE", "worker": "w2_guidance", "facts": 0, "claims": 4}
+{"ts": "2026-08-16T17:34:33", "kind": "worker_done", "company_id": "DE", "worker": "w3_operating_model", "facts": 4, "claims": 5}
+{"ts": "2026-08-16T17:34:33", "kind": "worker_done", "company_id": "DE", "worker": "w4_demand_peers", "facts": 0, "claims": 3}
+{"ts": "2026-08-16T17:35:02", "kind": "challenges", "company_id": "DE", "kept": 5, "severities": ["high", "high", "high", "medium", "medium"]}
+{"ts": "2026-08-16T17:35:02", "kind": "coverage", "company_id": "DE", "coverage": {"de_net_sales": {"historical_points": 18, "historical_ok": true, "guidance_present": false, "driver_claims": 2, "external_corroboration": true, "counterevidence_present": true}, "de_eps_gaap": {"historical_points": 18, "historical_ok": true, "guidance_present": false, "driver_claims": 2, "external_corroboration": false, "counterevidence_present": true}, "de_ppa_op": {"historical_points": 1, "historical_ok": false, "guidance_present": false, "driver_claims": 4, "external_corroboration": true, "counterevidence_present": true}}}
+{"ts": "2026-08-16T17:35:19", "kind": "dossier_written", "company_id": "DE", "path": "/Users/egorvert/Developer/agents-vs-wall-street-starter/out/DE/research/dossier.md", "chars": 31436, "facts": 37}
+{"ts": "2026-08-16T17:35:19", "kind": "run_done", "ok": 1, "total": 1}
