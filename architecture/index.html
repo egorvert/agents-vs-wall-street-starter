@@ -18,11 +18,7 @@
       --blue: #2059c7;
       --blue-soft: #edf3ff;
       --green: #18623f;
-      --green-soft: #eef8f1;
       --amber: #7a4e0b;
-      --amber-soft: #fff7e8;
-      --red: #a23838;
-      --red-soft: #fff2f0;
       --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
       --sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       --serif: Georgia, "Times New Roman", serif;
@@ -33,7 +29,7 @@
     html { scroll-behavior: smooth; }
     body { margin: 0; color: var(--text); background: var(--page); font: 15.5px/1.58 var(--sans); }
     strong, h1, h2, h3 { color: var(--ink); }
-    code, pre, .mono, .eyebrow, .label, .ordinal, th { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+    code, pre, .mono, .eyebrow, .label, .ordinal { font-family: var(--mono); font-variant-numeric: tabular-nums; }
     code { padding: .1em .32em; color: #17366d; background: var(--blue-soft); border: 1px solid #d1daea; border-radius: 4px; font-size: .88em; overflow-wrap: anywhere; }
     p, li { max-width: 76ch; }
     a { color: var(--blue); text-underline-offset: 3px; }
@@ -68,58 +64,10 @@
     .architecture-title { display: flex; justify-content: space-between; gap: 16px; margin-bottom: 15px; }
     .architecture-title strong { font-size: 13px; }
     .architecture-title span { color: var(--muted); font: 10px/1.4 var(--mono); text-align: right; }
-    .arch-stack { display: grid; justify-items: stretch; }
-    .stage-card { padding: 14px 16px; border: 1px solid var(--line); background: #fbfbf8; }
-    .stage-card h3 { font-size: 15px; }
-    .stage-card p { margin: 5px 0 0; color: var(--muted); font-size: 11.5px; line-height: 1.42; }
-    .source-stage { justify-self: center; width: min(620px, 100%); border-top: 4px solid var(--ink); text-align: center; }
-    .research-stage { display: grid; grid-template-columns: .7fr 1.3fr auto; align-items: center; gap: 18px; border-top: 4px solid var(--red); background: var(--red-soft); }
-    .research-stage .label { color: var(--red); }
-    .contract-chip { padding: 7px 9px; color: #6b2c2c; background: white; border: 1px solid #e5c3bf; font: 9px/1.35 var(--mono); }
-    .persona-panel { padding: 12px 14px 13px; background: #fffaf8; border: 1px solid #e5c3bf; border-top: 0; }
-    .persona-head { display: flex; align-items: baseline; justify-content: space-between; gap: 14px; }
-    .persona-head strong { font-size: 11px; }
-    .persona-head span { color: var(--red); font: 8.5px/1.35 var(--mono); text-align: right; }
-    .persona-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-top: 9px; }
-    .persona { padding: 6px 7px; color: #673434; background: white; border: 1px solid #ead0cd; font: 8.5px/1.3 var(--mono); text-align: center; }
-    .specialist-line { margin: 8px 0 0; max-width: none; color: var(--muted); font-size: 9.5px; line-height: 1.4; }
-    .flow-arrow { height: 29px; color: var(--blue); font: 800 18px/29px var(--mono); text-align: center; }
-    .fanout-label { display: grid; justify-items: center; height: 45px; color: var(--green); font: 9px/1.4 var(--mono); text-transform: uppercase; letter-spacing: .05em; }
-    .fanout-label strong { color: var(--green); font-size: 21px; line-height: 1; }
-    .products { position: relative; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding-top: 18px; }
-    .products::before { content: ""; position: absolute; top: 0; left: 12.5%; right: 12.5%; border-top: 2px solid var(--green); }
-    .product { position: relative; min-height: 112px; padding: 13px; background: var(--green-soft); border: 1px solid #b9d8c5; border-top: 4px solid var(--green); }
-    .product::before { content: ""; position: absolute; top: -22px; left: 50%; height: 18px; border-left: 2px solid var(--green); }
-    .product h3 { font-size: 13px; }
-    .product p { margin: 6px 0 0; color: var(--muted); font-size: 10.5px; line-height: 1.4; }
-    .product .handoff { display: block; margin-top: 9px; padding-top: 7px; border-top: 1px solid #cae0d2; color: var(--green); font: 8.5px/1.3 var(--mono); }
-    .quant-feed { display: grid; justify-items: center; padding: 10px 0 7px; color: var(--blue); font: 9px/1.3 var(--mono); text-transform: uppercase; letter-spacing: .05em; }
-    .quant-feed strong { margin-top: 2px; font-size: 21px; line-height: 1; }
-    .quant-lane { padding: 14px; background: var(--blue-soft); border: 1px solid #bcccec; border-top: 4px solid var(--blue); }
-    .lane-title { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
-    .lane-title h3 { font-size: 15px; }
-    .lane-title span { color: var(--blue); font: 9px/1.3 var(--mono); text-transform: uppercase; letter-spacing: .05em; }
-    .quant-steps { display: grid; grid-template-columns: 1fr 28px 1fr 28px 1fr; align-items: center; }
-    .quant-step { min-height: 91px; padding: 11px 12px; background: white; border: 1px solid #becae0; }
-    .quant-step small { display: block; margin-bottom: 5px; color: var(--blue); font: 8px/1 var(--mono); }
-    .quant-step strong { font-size: 12px; }
-    .quant-step p { margin: 4px 0 0; color: var(--muted); font-size: 9.8px; line-height: 1.38; }
-    .step-arrow, .final-arrow { color: var(--blue); font: 800 18px/1 var(--mono); text-align: center; }
-    .converge { padding-top: 16px; }
-    .converge > .label { color: var(--muted); text-align: center; }
-    .signals { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-    .signal { padding: 7px 8px; color: #40506a; background: #f6f7f5; border: 1px solid var(--line); font: 9px/1.3 var(--mono); text-align: center; }
-    .merge-arrow { height: 28px; color: var(--amber); font: 800 20px/28px var(--mono); text-align: center; }
-    .final-row { display: grid; grid-template-columns: 1.15fr 34px .85fr; align-items: stretch; }
-    .final-stage { border-top: 4px solid #b47b20; background: var(--amber-soft); }
-    .final-stage .label { color: var(--amber); }
-    .delivery-stage { border-top: 4px solid var(--green); background: #f5f8f5; }
-    .delivery-stage .label { color: var(--green); }
     .label { display: block; margin-bottom: 7px; font-size: 8.5px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
-    .feedback { display: grid; grid-template-columns: 1fr 34px 1fr 34px 1.45fr; align-items: center; gap: 0; margin-top: 16px; padding-top: 15px; border-top: 1px dashed #aeb6c3; }
-    .feedback-box { padding: 10px 12px; background: #f6f7f5; border: 1px solid var(--line); font-size: 11px; }
-    .feedback-arrow { color: var(--blue); font: 800 17px/1 var(--mono); text-align: center; }
-    .legend { margin: 12px 0 0; color: var(--muted); font: 9px/1.4 var(--mono); text-align: center; }
+    .system-figure { margin: 0; overflow-x: auto; }
+    .system-figure svg { display: block; width: 100%; min-width: 760px; height: auto; }
+    .system-figure figcaption { margin-top: 11px; color: var(--muted); font-size: 10.5px; text-align: center; }
 
     .components { border-top: 1px solid var(--line); }
     .component { display: grid; grid-template-columns: 70px minmax(0, 1fr) minmax(230px, .55fr); gap: 18px; padding: 23px 0; border-bottom: 1px solid var(--line); }
@@ -138,11 +86,6 @@
     pre { margin: 22px 0 0; padding: 17px 19px; overflow: auto; color: #eef4ff; background: #17233a; border-radius: 7px; font: 12px/1.6 var(--mono); }
     pre code { padding: 0; color: inherit; background: transparent; border: 0; font-size: inherit; }
 
-    .table-wrap { overflow-x: auto; border: 1px solid var(--line); }
-    table { width: 100%; border-collapse: collapse; background: white; font-size: 12.5px; }
-    th { padding: 10px 11px; color: #455269; background: #f4f6f8; border-bottom: 1px solid var(--line); font-size: 9px; font-weight: 800; letter-spacing: .06em; text-align: left; text-transform: uppercase; }
-    td { padding: 11px; border-top: 1px solid var(--line-soft); vertical-align: top; }
-    tbody tr:first-child td { border-top: 0; }
     .callout { margin-top: 22px; padding: 15px 18px; background: var(--blue-soft); border-left: 3px solid var(--blue); font-size: 13px; }
     .callout p { margin: 0; }
 
@@ -159,12 +102,6 @@
     footer p { margin: 0; max-width: none; }
 
     @media (max-width: 940px) {
-      .products { grid-template-columns: repeat(2, 1fr); }
-      .products { padding-top: 0; }
-      .products::before, .product::before { display: none; }
-      .persona-grid { grid-template-columns: repeat(2, 1fr); }
-      .research-stage { grid-template-columns: 1fr 1.4fr; }
-      .research-stage .contract-chip { grid-column: 1 / -1; }
       .component { grid-template-columns: 52px minmax(0, 1fr); }
       .contract { grid-column: 2; padding: 12px 0 0; border-left: 0; border-top: 1px dashed var(--line); }
       .decision-grid { grid-template-columns: repeat(2, 1fr); }
@@ -180,15 +117,6 @@
       .section-head { grid-template-columns: 1fr; gap: 5px; }
       .ordinal { padding-top: 0; }
       .limitation:nth-child(2) { border-top: 1px solid var(--line); }
-      .feedback { grid-template-columns: 1fr; gap: 7px; min-width: 0; }
-      .feedback-arrow { transform: rotate(90deg); }
-      .products, .signals { grid-template-columns: 1fr; }
-      .research-stage, .quant-steps, .final-row { grid-template-columns: 1fr; }
-      .research-stage { text-align: left; }
-      .persona-head { display: block; }
-      .persona-head span { display: block; margin-top: 4px; text-align: left; }
-      .step-arrow, .final-arrow { height: 25px; line-height: 25px; transform: rotate(90deg); }
-      .quant-step { min-height: 0; }
       h1 { font-size: 41px; }
     }
     @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
@@ -198,7 +126,7 @@
       body { background: white; }
       .page { width: 100%; margin: 0; border: 0; box-shadow: none; }
       .toc, .skip { display: none; }
-      section, .architecture, .component, table, pre { break-inside: avoid; page-break-inside: avoid; }
+      section, .architecture, .component, pre { break-inside: avoid; page-break-inside: avoid; }
       h2, h3 { break-after: avoid; }
     }
   </style>
@@ -209,11 +137,11 @@
     <header class="hero">
       <p class="eyebrow">Forecasting system · architecture</p>
       <h1>Evidence breadth, deterministic magnitude, measurable improvement.</h1>
-      <p class="lede">The system turns a dated evidence archive into cited fundamental features, a backtestable quantitative forecast and a bounded final judgment. Language models gather and interpret evidence; code owns arithmetic, constraints and delivery.</p>
+      <p class="lede">The system turns a dated evidence archive into cited qualitative signals, a backtestable quantitative forecast and a bounded final judgment. Each reported result becomes labelled training and evaluation data for the next version.</p>
       <div class="principles" aria-label="Core architectural principles">
         <div class="principle"><strong>Ground every signal</strong><span>Source, date, quote, metric, unit and basis.</span></div>
         <div class="principle"><strong>Separate judgment from math</strong><span>Models propose drivers; code computes values.</span></div>
-        <div class="principle"><strong>Learn from realised error</strong><span>Swap and backtest components behind stable contracts.</span></div>
+        <div class="principle"><strong>Learn from realised error</strong><span>Version, tune and backtest modules behind stable contracts.</span></div>
       </div>
     </header>
 
@@ -221,7 +149,6 @@
       <a href="#overview">Overview</a>
       <a href="#components">Components</a>
       <a href="#decisions">Decisions</a>
-      <a href="#evolution">Evolution</a>
       <a href="#limits">Limits</a>
       <a href="#reproduce">Reproduce</a>
     </nav>
@@ -229,122 +156,155 @@
     <main id="main">
       <section id="overview">
         <div class="section-head">
-          <span class="ordinal">01 / 06</span>
-          <div><h2>System overview</h2><p>A file-based pipeline with a separate post-results learning loop. Each handoff is inspectable, replaceable and independently testable.</p></div>
+          <span class="ordinal">01 / 05</span>
+          <div><h2>System overview</h2><p>Grounded research separates into qualitative judgment and quantitative forecasting, then converges in a bounded final call. Fixed file contracts keep every module inspectable, modular and independently evaluable.</p></div>
         </div>
 
         <div class="architecture" aria-label="Architecture diagram">
-          <div class="architecture-title"><strong>Forecast-time data path</strong><span>Branching flow and major handoffs</span></div>
-          <div class="arch-stack">
-            <article class="stage-card source-stage">
-              <span class="label">Point-in-time source contract</span>
-              <h3>Frozen evidence + exact metric definitions</h3>
-              <p>Filings and dated market evidence enter with source, date, quote, period, unit and accounting basis.</p>
-            </article>
+          <div class="architecture-title"><strong>The system as built—and designed to improve</strong><span>Fixed files at forecast-time boundaries</span></div>
+          <figure class="system-figure">
+            <svg viewBox="0 0 960 1270" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="diagram-title diagram-desc" font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">
+              <title id="diagram-title">Forecasting architecture with qualitative and quantitative analysis lanes</title>
+              <desc id="diagram-desc">Point-in-time evidence feeds a multi-perspective research swarm. Its dossier branches into qualitative analysis and a modular quantitative forecaster. Both lanes converge in bounded reconciliation, followed by validation and workbook delivery. Reported actuals create labelled events for evaluation and approved iteration.</desc>
+              <defs><marker id="arch-arrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#98a2b3"/></marker></defs>
+              <!-- point-in-time evidence -->
+              <rect x="40" y="10" width="420" height="65" rx="10" fill="#fff" stroke="#98a2b3" stroke-width="1.4"/>
+              <text x="250" y="37" text-anchor="middle" font-size="14" font-weight="700">Frozen company evidence</text>
+              <text x="250" y="57" text-anchor="middle" font-size="12" fill="#596579">filings · transcripts · presentations</text>
+              <rect x="500" y="10" width="420" height="65" rx="10" fill="#fff" stroke="#98a2b3" stroke-width="1.4"/>
+              <text x="710" y="37" text-anchor="middle" font-size="14" font-weight="700">Dated market evidence</text>
+              <text x="710" y="57" text-anchor="middle" font-size="12" fill="#596579">append-only snapshot · explicit cutoff</text>
+              <line x1="250" y1="75" x2="250" y2="106" stroke="#98a2b3" stroke-width="1.8" marker-end="url(#arch-arrow)"/>
+              <line x1="710" y1="75" x2="710" y2="106" stroke="#98a2b3" stroke-width="1.8" marker-end="url(#arch-arrow)"/>
+              <!-- research swarm -->
+              <rect x="20" y="110" width="920" height="300" rx="14" fill="#fff4f2" stroke="#c83f38" stroke-width="1.7"/>
+              <text x="40" y="140" font-size="13" font-weight="800" letter-spacing="1.4" fill="#a23838">1 · FOUNDATIONAL RESEARCH SWARM</text>
+              <text x="920" y="140" text-anchor="end" font-size="11" fill="#596579" font-family="ui-monospace, Menlo, monospace">pipeline/research/</text>
+              <text x="40" y="163" font-size="12.5" fill="#596579">Distinct perspectives share one evidence packet: claims, direction, sources, counterevidence and falsifiers—never a forecast level.</text>
+              <g fill="#fff" stroke="#dfaaa6" stroke-width="1.1" font-size="11.5" text-anchor="middle">
+                <rect x="40" y="180" width="168" height="40" rx="7"/><text x="124" y="205" fill="#513438" stroke="none">Metric + history</text>
+                <rect x="218" y="180" width="168" height="40" rx="7"/><text x="302" y="205" fill="#513438" stroke="none">Management guidance</text>
+                <rect x="396" y="180" width="168" height="40" rx="7"/><text x="480" y="205" fill="#513438" stroke="none">Operating model</text>
+                <rect x="574" y="180" width="168" height="40" rx="7"/><text x="658" y="205" fill="#513438" stroke="none">Demand + customer</text>
+                <rect x="752" y="180" width="168" height="40" rx="7"/><text x="836" y="199" fill="#513438" stroke="none"><tspan x="836">Supply + cost</tspan><tspan x="836" dy="14">+ inventory</tspan></text>
+                <rect x="40" y="230" width="168" height="40" rx="7"/><text x="124" y="255" fill="#513438" stroke="none">Peers + ecosystem</text>
+                <rect x="218" y="230" width="168" height="40" rx="7"/><text x="302" y="255" fill="#513438" stroke="none">Macro + policy</text>
+                <rect x="396" y="230" width="168" height="40" rx="7"/><text x="480" y="249" fill="#513438" stroke="none"><tspan x="480">Current-quarter</tspan><tspan x="480" dy="14">nowcast</tspan></text>
+                <rect x="574" y="230" width="168" height="40" rx="7"/><text x="658" y="255" fill="#513438" stroke="none">Street expectations</text>
+                <rect x="752" y="230" width="168" height="40" rx="7"/><text x="836" y="249" fill="#513438" stroke="none"><tspan x="836">Accounting +</tspan><tspan x="836" dy="14">capital structure</tspan></text>
+              </g>
+              <text x="40" y="296" font-size="11.5" font-weight="700" fill="#a23838">Implemented today: four consolidated research lenses plus a separate counterevidence pass.</text>
+              <text x="40" y="320" font-size="11.2" fill="#596579"><tspan font-weight="700">Conditional routing:</tspan> product cycle · M&amp;A · regulation/litigation · geopolitics/trade · weather/calendar · market-implied uncertainty</text>
+              <text x="40" y="342" font-size="11.2" fill="#596579"><tspan font-weight="700">Challenge passes:</tspan> counterevidence now; variant perception and bull/bear as designed extensions</text>
+              <rect x="40" y="357" width="880" height="34" rx="7" fill="#fff" stroke="#dfaaa6" stroke-width="1.1"/>
+              <text x="480" y="379" text-anchor="middle" font-size="11.2" fill="#596579">Code gates · source/date/quote · metric/unit/basis · period/scale · near-miss line items · coverage gaps</text>
+              <line x1="480" y1="410" x2="480" y2="429" stroke="#98a2b3" stroke-width="1.8" marker-end="url(#arch-arrow)"/>
+              <rect x="230" y="433" width="500" height="50" rx="10" fill="#fff" stroke="#98a2b3" stroke-width="1.4"/>
+              <text x="480" y="455" text-anchor="middle" font-size="13" font-weight="700" font-family="ui-monospace, Menlo, monospace">research/dossier.md</text>
+              <text x="480" y="473" text-anchor="middle" font-size="11.3" fill="#596579">cited narrative + machine-readable facts + coverage</text>
+              <path d="M350 483 L240 516" fill="none" stroke="#98a2b3" stroke-width="1.8" marker-end="url(#arch-arrow)"/>
+              <path d="M610 483 L720 516" fill="none" stroke="#98a2b3" stroke-width="1.8" marker-end="url(#arch-arrow)"/>
+              <!-- qualitative lane -->
+              <rect x="20" y="520" width="440" height="320" rx="14" fill="#f0f8f2" stroke="#1d7a4d" stroke-width="1.7"/>
+              <text x="40" y="550" font-size="13" font-weight="800" letter-spacing="1.4" fill="#18623f">2A · QUALITATIVE ANALYSIS</text>
+              <text x="440" y="550" text-anchor="end" font-size="11" fill="#596579" font-family="ui-monospace, Menlo, monospace">context.md · news.md</text>
+              <text x="40" y="572" font-size="11.8" fill="#596579">What could move the next result, and why?</text>
+              <rect x="40" y="590" width="400" height="52" rx="8" fill="#fff" stroke="#a9d0b9" stroke-width="1.1"/>
+              <text x="240" y="612" text-anchor="middle" font-size="12.5" font-weight="700">Industry + competitor context</text>
+              <text x="240" y="629" text-anchor="middle" font-size="10.8" fill="#596579">demand, share and peer read-across</text>
+              <rect x="40" y="654" width="400" height="52" rx="8" fill="#fff" stroke="#a9d0b9" stroke-width="1.1"/>
+              <text x="240" y="676" text-anchor="middle" font-size="12.5" font-weight="700">Guidance + recent external forces</text>
+              <text x="240" y="693" text-anchor="middle" font-size="10.8" fill="#596579">news, macro, policy and current-quarter change</text>
+              <rect x="40" y="718" width="400" height="52" rx="8" fill="#fff" stroke="#a9d0b9" stroke-width="1.1"/>
+              <text x="240" y="740" text-anchor="middle" font-size="12.5" font-weight="700">Counterevidence + challenge view</text>
+              <text x="240" y="757" text-anchor="middle" font-size="10.8" fill="#596579">causal drivers, risks and falsifiers</text>
+              <text x="240" y="808" text-anchor="middle" font-size="11.5" font-weight="700" fill="#18623f">OUT · cited directional drivers</text>
 
-            <div class="flow-arrow" aria-hidden="true">↓</div>
+              <!-- quantitative lane -->
+              <rect x="500" y="520" width="440" height="320" rx="14" fill="#edf4ff" stroke="#2059c7" stroke-width="1.7"/>
+              <text x="520" y="550" font-size="13" font-weight="800" letter-spacing="1.4" fill="#2059c7">2B · QUANTITATIVE ANALYSIS</text>
+              <text x="920" y="550" text-anchor="end" font-size="11" fill="#596579" font-family="ui-monospace, Menlo, monospace">analysis/ + quant/</text>
+              <text x="520" y="572" font-size="11.8" fill="#596579">Modular · versioned · backtestable</text>
+              <rect x="520" y="590" width="400" height="44" rx="8" fill="#fff" stroke="#b7c8e7" stroke-width="1.1"/>
+              <text x="720" y="617" text-anchor="middle" font-size="12.2" font-weight="700">Verified facts + public anchors</text>
+              <line x1="720" y1="634" x2="720" y2="646" stroke="#98a2b3" stroke-width="1.5" marker-end="url(#arch-arrow)"/>
+              <rect x="520" y="650" width="400" height="44" rx="8" fill="#fff" stroke="#b7c8e7" stroke-width="1.1"/>
+              <text x="720" y="677" text-anchor="middle" font-size="12.2" font-weight="700">Strict extraction + normalization</text>
+              <line x1="720" y1="694" x2="720" y2="706" stroke="#98a2b3" stroke-width="1.5" marker-end="url(#arch-arrow)"/>
+              <rect x="520" y="710" width="400" height="44" rx="8" fill="#fff" stroke="#b7c8e7" stroke-width="1.1"/>
+              <text x="720" y="737" text-anchor="middle" font-size="12.2" font-weight="700">Comparable period time series</text>
+              <line x1="720" y1="754" x2="720" y2="766" stroke="#98a2b3" stroke-width="1.5" marker-end="url(#arch-arrow)"/>
+              <rect x="520" y="770" width="400" height="44" rx="8" fill="#fff" stroke="#b7c8e7" stroke-width="1.1"/>
+              <text x="720" y="797" text-anchor="middle" font-size="12.2" font-weight="700">Forecast base + deterministic guardrail range</text>
+              <text x="720" y="830" text-anchor="middle" font-size="11.5" font-weight="700" fill="#2059c7">OUT · base estimate + bounded range</text>
+              <!-- convergence and reconciliation -->
+              <line x1="240" y1="840" x2="240" y2="870" stroke="#98a2b3" stroke-width="1.8" marker-end="url(#arch-arrow)"/>
+              <line x1="720" y1="840" x2="720" y2="870" stroke="#98a2b3" stroke-width="1.8" marker-end="url(#arch-arrow)"/>
+              <rect x="20" y="875" width="920" height="145" rx="14" fill="#fff7e8" stroke="#b47b20" stroke-width="1.7"/>
+              <text x="40" y="905" font-size="13" font-weight="800" letter-spacing="1.4" fill="#7a4e0b">3 · BOUNDED RECONCILIATION</text>
+              <text x="920" y="905" text-anchor="end" font-size="11" fill="#596579" font-family="ui-monospace, Menlo, monospace">pipeline/combine/ → final.json</text>
+              <rect x="40" y="925" width="270" height="68" rx="8" fill="#fff" stroke="#dfc18e" stroke-width="1.1"/>
+              <text x="175" y="950" text-anchor="middle" font-size="12.3" font-weight="700">Blind directional read</text>
+              <text x="175" y="970" text-anchor="middle" font-size="10.8" fill="#596579">consensus removed</text>
+              <line x1="310" y1="959" x2="341" y2="959" stroke="#98a2b3" stroke-width="1.5" marker-end="url(#arch-arrow)"/>
+              <rect x="345" y="925" width="270" height="68" rx="8" fill="#fff" stroke="#dfc18e" stroke-width="1.1"/>
+              <text x="480" y="950" text-anchor="middle" font-size="12.3" font-weight="700">Reveal anchors + range</text>
+              <text x="480" y="970" text-anchor="middle" font-size="10.8" fill="#596579">direction and delta only</text>
+              <line x1="615" y1="959" x2="646" y2="959" stroke="#98a2b3" stroke-width="1.5" marker-end="url(#arch-arrow)"/>
+              <rect x="650" y="925" width="270" height="68" rx="8" fill="#fff" stroke="#dfc18e" stroke-width="1.1"/>
+              <text x="785" y="950" text-anchor="middle" font-size="12.3" font-weight="700">Deterministic finalization</text>
+              <text x="785" y="970" text-anchor="middle" font-size="10.8" fill="#596579">shrink · round · clamp</text>
+              <text x="480" y="1010" text-anchor="middle" font-size="10.8" fill="#596579">The reasoning schema has no submitted-value field; arithmetic stays in code.</text>
 
-            <article class="stage-card research-stage">
-              <div><span class="label">Agentic fan-out</span><h3>Foundational research swarm</h3></div>
-              <p>Separate contexts prevent premature consensus. Each lens contributes evidence, causal claims, counterevidence and falsifiers—never a final forecast.</p>
-              <span class="contract-chip">OUT · grounded dossier + coverage</span>
-            </article>
-
-            <div class="persona-panel">
-              <div class="persona-head"><strong>Designed perspective portfolio</strong><span>Today · four consolidated lenses + counterevidence</span></div>
-              <div class="persona-grid" aria-label="Core research perspectives">
-                <span class="persona">Metric + history</span>
-                <span class="persona">Management guidance</span>
-                <span class="persona">Operating model</span>
-                <span class="persona">Demand + customer</span>
-                <span class="persona">Supply + cost + inventory</span>
-                <span class="persona">Peers + ecosystem</span>
-                <span class="persona">Macro + policy</span>
-                <span class="persona">Current-quarter nowcast</span>
-                <span class="persona">Street expectations</span>
-                <span class="persona">Accounting + capital structure</span>
-              </div>
-              <p class="specialist-line"><strong>Conditional routing:</strong> product cycle · M&amp;A · regulation/litigation · geopolitics/trade · weather/calendar · market-implied uncertainty. <strong>Challenge passes:</strong> counterevidence now; variant perception and bull/bear as designed extensions.</p>
-            </div>
-
-            <div class="fanout-label"><span>Focused analysis products</span><strong aria-hidden="true">↓</strong></div>
-
-            <div class="products">
-              <article class="product"><h3>Context &amp; peers</h3><p>Industry conditions and competitor read-across.</p><span class="handoff">QUALITATIVE SIGNALS</span></article>
-              <article class="product"><h3>Verified facts</h3><p>Comparable numerical history with full evidence lineage.</p><span class="handoff">QUANT INPUT</span></article>
-              <article class="product"><h3>News impacts</h3><p>Dated external forces mapped to metric direction.</p><span class="handoff">QUALITATIVE SIGNALS</span></article>
-              <article class="product"><h3>Public anchors</h3><p>Available consensus and guidance midpoints.</p><span class="handoff">QUANT + FINAL INPUT</span></article>
-            </div>
-
-            <div class="quant-feed"><span>Grounded dossier + verified facts + public anchors</span><strong aria-hidden="true">↓</strong></div>
-
-            <section class="quant-lane" aria-label="Quantitative forecaster">
-              <div class="lane-title"><h3>Quantitative forecaster</h3><span>Deterministic · replaceable · backtestable</span></div>
-              <div class="quant-steps">
-                <article class="quant-step"><small>01</small><strong>Strict extractor</strong><p>Normalizes scale, rejects basis and period mismatches, and holds out the target.</p></article>
-                <span class="step-arrow" aria-hidden="true">→</span>
-                <article class="quant-step"><small>02</small><strong>Comparable time series</strong><p>Keeps fiscal slots and full-year or half-year series like-for-like.</p></article>
-                <span class="step-arrow" aria-hidden="true">→</span>
-                <article class="quant-step"><small>03</small><strong>Base + guardrail range</strong><p>Combines historical behavior and anchors into a bounded magnitude.</p></article>
-              </div>
-            </section>
-
-            <div class="converge">
-              <span class="label">Signals converge</span>
-              <div class="signals">
-                <span class="signal">context + peers</span>
-                <span class="signal">news impacts</span>
-                <span class="signal">public anchors</span>
-                <span class="signal">quant base + range</span>
-              </div>
-              <div class="merge-arrow" aria-hidden="true">↓</div>
-            </div>
-
-            <div class="final-row">
-              <article class="stage-card final-stage">
-                <span class="label">Model proposal · code decision</span>
-                <h3>Bounded reconciliation</h3>
-                <p>Blind view, then anchor reveal. Only a corroborated direction and delta can move the anchor; code shrinks and clamps the result.</p>
-              </article>
-              <span class="final-arrow" aria-hidden="true">→</span>
-              <article class="stage-card delivery-stage">
-                <span class="label">Deterministic</span>
-                <h3>Contract gate + workbook</h3>
-                <p>Validate the final record, write forecast cells and preserve the execution log.</p>
-              </article>
-            </div>
-          </div>
-          <div class="feedback" aria-label="Post-results feedback loop">
-            <div class="feedback-box"><strong>Reported actuals</strong><br>admitted only after the forecast cutoff</div>
-            <div class="feedback-arrow" aria-hidden="true">→</div>
-            <div class="feedback-box"><strong>Evaluation harness</strong><br>point-in-time error, range coverage, event sensitivity</div>
-            <div class="feedback-arrow" aria-hidden="true">→</div>
-            <div class="feedback-box"><strong>Approved updates</strong><br>features · architecture · weights · prompts · models → next forecast</div>
-          </div>
-          <p class="legend">Forecast-time path above · post-results learning loop below</p>
+              <!-- delivery -->
+              <line x1="480" y1="1020" x2="480" y2="1046" stroke="#98a2b3" stroke-width="1.8" marker-end="url(#arch-arrow)"/>
+              <rect x="20" y="1050" width="920" height="75" rx="14" fill="#fff" stroke="#667085" stroke-width="1.6"/>
+              <text x="40" y="1079" font-size="13" font-weight="800" letter-spacing="1.4" fill="#404b5f">4 · CONTRACT GATE + DELIVERY</text>
+              <text x="40" y="1104" font-size="11.5" fill="#596579">fallback where admissible data exists</text>
+              <text x="485" y="1092" text-anchor="middle" font-size="12.2" font-weight="700">validate contracts + ranges</text>
+              <text x="670" y="1093" text-anchor="middle" font-size="15" fill="#98a2b3">→</text>
+              <text x="815" y="1083" text-anchor="middle" font-size="12.5" font-weight="700">workbooks + run log</text>
+              <text x="815" y="1103" text-anchor="middle" font-size="10.8" fill="#596579">write forecast cells only</text>
+              <!-- post-results improvement loop -->
+              <line x1="480" y1="1125" x2="480" y2="1146" stroke="#98a2b3" stroke-width="1.8" marker-end="url(#arch-arrow)"/>
+              <rect x="20" y="1150" width="920" height="105" rx="14" fill="#f1f4ff" stroke="#566fc9" stroke-width="1.5" stroke-dasharray="5 4"/>
+              <text x="40" y="1178" font-size="13" font-weight="800" letter-spacing="1.3" fill="#3d55a5">POST-RESULTS IMPROVEMENT LOOP</text>
+              <g font-size="10.8" text-anchor="middle">
+                <rect x="40" y="1192" width="185" height="36" rx="7" fill="#fff" stroke="#bac5ed"/><text x="132.5" y="1214" fill="#2b3649">Forecast snapshot + actual</text>
+                <text x="240" y="1215" fill="#566fc9" font-size="15">→</text>
+                <rect x="255" y="1192" width="185" height="36" rx="7" fill="#fff" stroke="#bac5ed"/><text x="347.5" y="1214" fill="#2b3649">Walk-forward evaluation</text>
+                <text x="455" y="1215" fill="#566fc9" font-size="15">→</text>
+                <rect x="470" y="1192" width="185" height="36" rx="7" fill="#fff" stroke="#bac5ed"/><text x="562.5" y="1214" fill="#2b3649">Tune + ablate candidates</text>
+                <text x="670" y="1215" fill="#566fc9" font-size="15">→</text>
+                <rect x="685" y="1192" width="235" height="36" rx="7" fill="#fff" stroke="#bac5ed"/><text x="802.5" y="1214" fill="#2b3649">Holdout gate → approved iteration ↺</text>
+              </g>
+              <text x="480" y="1246" text-anchor="middle" font-size="10.8" fill="#596579">More labelled events enable stronger feature selection, estimator tuning, range calibration and routing—promoted only after held-out improvement.</text>
+            </svg>
+            <figcaption>Each reported result completes a labelled point-in-time event: its loss can train trainable modules and evaluate deterministic ones, while arithmetic and delivery remain code-owned.</figcaption>
+          </figure>
         </div>
       </section>
 
       <section id="components">
         <div class="section-head">
-          <span class="ordinal">02 / 06</span>
-          <div><h2>Component zoom-in</h2><p>Every component has one job and a narrow output contract. That is what makes the system understandable, substitutable and measurable.</p></div>
+          <span class="ordinal">02 / 05</span>
+          <div><h2>Component zoom-in</h2><p>Every component has one job and a narrow output contract. That makes the system understandable, modular and measurable.</p></div>
         </div>
 
         <div class="components">
           <article class="component">
             <span class="component-no">01</span>
-            <div class="component-copy"><h3>Grounded research</h3><p>The implemented swarm consolidates the wider persona design into four fixed lenses—history, guidance, operating model, and demand/peers—plus a counterevidence pass. The intended bench separates ten core perspectives and routes conditional specialists only when material. Code rejects invalid metrics, periods, scales, quotes and near-miss line items.</p></div>
+            <div class="component-copy"><h3>Grounded research</h3><p>Current code consolidates the ten-perspective design into four lenses plus counterevidence. Every lens uses the same evidence packet; coverage gaps can drive future specialist routing. Code rejects invalid metrics, periods, scales, quotes and near-miss line items.</p></div>
             <div class="contract"><span class="label">Contract</span><p>Common evidence packet; coverage across history, guidance, operating bridge, external corroboration and expectations; no final value.</p><span class="path">pipeline/research/ · docs/personas.md</span></div>
           </article>
           <article class="component">
             <span class="component-no">02</span>
-            <div class="component-copy"><h3>Fundamental feature layer</h3><p>Structured analysis separates what happened from what may move the next result: comparable history, directional drivers, recent news and public anchors. Machine facts retain full evidence lineage; prose views stay compact.</p></div>
+            <div class="component-copy"><h3>Qualitative and quantitative features</h3><p>The dossier forks into cited context, news and directional drivers on one side, and numerical facts plus public anchors on the other. The lanes stay separate until reconciliation so qualitative judgment cannot silently rewrite quantitative history.</p></div>
             <div class="contract"><span class="label">Contract</span><p>Facts, context, news impacts and anchors—usable by both quant and reconciliation.</p><span class="path">pipeline/analysis/</span></div>
           </article>
           <article class="component">
             <span class="component-no">03</span>
-            <div class="component-copy"><h3>Backtestable quantitative forecaster</h3><p>Deterministic methods operate only on comparable periods, then combine history and anchors into a base and range. Rounding-aware normalization accepts explicit source scales while rejecting unresolved conflicts. Any better model can replace this component by writing the same contract.</p></div>
+            <div class="component-copy"><h3>Backtestable quantitative forecaster</h3><p>Deterministic methods operate only on comparable periods, then combine history and anchors into a base and range. Its stable contract lets us iterate on features, methods and parameters while scoring every version against the same held-out events.</p></div>
             <div class="contract"><span class="label">Contract</span><p><code>timeseries.json → ranges.json</code>, with method and evidence lineage.</p><span class="path">pipeline/quant/</span></div>
           </article>
           <article class="component">
@@ -359,20 +319,20 @@
           </article>
           <article class="component">
             <span class="component-no">06</span>
-            <div class="component-copy"><h3>Evaluation and MLOps loop</h3><p>Historical events freeze the information set before the result, then admit the cited actual afterward. Today the scorer compares quant configurations, range coverage and leave-one-event-out sensitivity. Realised error feeds approved configuration changes; stable contracts enable broader feature, model and architecture ablations.</p></div>
-            <div class="contract"><span class="label">Contract</span><p>Point-in-time event, per-metric loss, configuration summary and sensitivity report.</p><span class="path">pipeline/quant/backtest.py · evaluation.py</span></div>
+            <div class="component-copy"><h3>Evaluation and MLOps loop</h3><p>Every forecast becomes a labelled point-in-time event after the actual is published. Today the harness scores error, benchmark performance, range coverage and event sensitivity. As data grows, we can fit trainable estimators and tune features, parameters and routing on past windows, promoting only versions that improve untouched holdouts.</p></div>
+            <div class="contract"><span class="label">Contract</span><p>Forecast snapshot, cited actual, configuration, per-metric loss and sensitivity report.</p><span class="path">pipeline/quant/backtest.py · evaluation.py</span></div>
           </article>
         </div>
-        <div class="callout"><p><strong>Test surfaces.</strong> Automated tests cover quant extraction, period comparability, guardrails and evaluation; runtime gates cover citations, contracts, reconciliation invariants and workbook structure.</p></div>
+        <div class="callout"><p><strong>Evaluation surfaces.</strong> Research: coverage and citation validity. Features: incremental predictive value. Quant: error and range calibration. Reconciliation: uplift over the untouched anchor. Delivery: contract and workbook success. Automation is deepest in quant today; other stages rely more on runtime gates.</p></div>
       </section>
 
       <section id="decisions">
         <div class="section-head">
-          <span class="ordinal">03 / 06</span>
+          <span class="ordinal">03 / 05</span>
           <div><h2>The four decisions that define the approach</h2></div>
         </div>
         <div class="decision-grid">
-          <div class="decision"><h3>Files over shared memory</h3><p>Agents coordinate through inspectable contracts, so stages can be replayed or replaced independently.</p></div>
+          <div class="decision"><h3>Files over shared memory</h3><p>Agents coordinate through inspectable contracts, so stages can be replayed, evaluated and improved independently.</p></div>
           <div class="decision"><h3>Models for judgment</h3><p>Language models find salience and direction; deterministic code owns arithmetic and scale.</p></div>
           <div class="decision"><h3>Anchor plus earned delta</h3><p>The system begins from a defensible base and moves only when cited evidence survives explicit gates.</p></div>
           <div class="decision"><h3>Evaluation over intuition</h3><p>New features or architectures must improve point-in-time backtests before entering the live path.</p></div>
@@ -383,42 +343,22 @@ final_value   = clamp(anchor + shrink × bounded_delta, forecast_range)
 The model never emits the submitted level.</code></pre>
       </section>
 
-      <section id="evolution">
-        <div class="section-head">
-          <span class="ordinal">04 / 06</span>
-          <div><h2>What changed—and why</h2><p>The design became smaller as evidence accumulated. Complexity was retained only where it improved coverage or control.</p></div>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Considered</th><th>Advantage</th><th>Decision</th></tr></thead>
-            <tbody>
-              <tr><td><strong>Dynamic agent routing and multi-round debate</strong></td><td>Flexible research and opposing views.</td><td>Replaced by fixed parallel specialists plus one counterevidence pass: easier to reproduce and less prone to social convergence.</td></tr>
-              <tr><td><strong>Runtime web retrieval</strong></td><td>Broader, newer discovery.</td><td>Excluded from the forecast path to preserve a provable cutoff and deterministic replay.</td></tr>
-              <tr><td><strong>Large estimator committee and aggressive blending</strong></td><td>Potential variance reduction and upside.</td><td>Replaced by one blind/reveal judgment with strong anchor retention; historical evaluation did not justify unconditional complexity.</td></tr>
-              <tr><td><strong>Automatic optimisation from realised results</strong></td><td>Faster self-improvement.</td><td>Kept human-gated until the historical sample is large enough to separate improvement from overfitting.</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-
       <section id="limits">
         <div class="section-head">
-          <span class="ordinal">05 / 06</span>
+          <span class="ordinal">04 / 05</span>
           <div><h2>Known limits</h2></div>
         </div>
         <div class="limitations">
           <article class="limitation"><h3>Research coverage can vary</h3><p>Fixed specialists improve replayability, but unusual issues may fall between roles and agentic extraction can vary. Coverage reports, retries and fallbacks contain that variance; they do not eliminate it.</p></article>
-          <article class="limitation"><h3>Ranges are safety rails, not calibrated probabilities</h3><p>They bound magnitude using history and anchors; they do not yet claim statistical confidence without a larger event set.</p></article>
-          <article class="limitation"><h3>Automated test depth is uneven</h3><p>The quant core has unit and point-in-time tests. Research, analysis, reconciliation and orchestration rely more heavily on runtime contract gates; broader integration and repeated-model tests remain work to do.</p></article>
-          <article class="limitation"><h3>The learning loop is only partly automated</h3><p>Quant scoring, range diagnostics and event sensitivity are implemented. Full-pipeline ablations, feature attribution, experiment registry and automatic promotion remain future work.</p></article>
-          <article class="limitation"><h3>Fallbacks still need admissible data</h3><p>A total upstream outage cannot manufacture trustworthy values. Clear runs must start from clean state and treat any missing workbook as a delivery failure.</p></article>
+          <article class="limitation"><h3>The labelled event set is still small</h3><p>Ranges are safety rails, not calibrated probabilities. Full-pipeline attribution, fitted estimators, experiment registry and automatic promotion require more point-in-time outcomes.</p></article>
+          <article class="limitation"><h3>Fail-soft still needs admissible data</h3><p>Runtime gates contain many stage errors, but a total upstream outage cannot manufacture trustworthy values. Clear runs must treat any missing workbook as a delivery failure.</p></article>
           <article class="limitation"><h3>Corroboration is structural, not semantic</h3><p>Distinct source files are required, but the system does not yet prove that sources are truly independent or that every quote entails the proposed delta.</p></article>
         </div>
       </section>
 
       <section id="reproduce">
         <div class="section-head">
-          <span class="ordinal">06 / 06</span>
+          <span class="ordinal">05 / 05</span>
           <div><h2>Reproduce the run</h2><p>Python 3.11+, pinned dependencies and a model API key are required. The first step preserves any prior outputs so stale artifacts cannot enter the run.</p></div>
         </div>
         <div class="repro">
