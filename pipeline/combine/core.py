@@ -494,10 +494,13 @@ def _validate_model_metrics(
             if not isinstance(driver.get("driver"), str) or not isinstance(driver.get("evidence_ids"), list):
                 raise CombineError(f"{where}/{metric_id} driver {driver_index}: invalid fields")
             ids.extend(driver["evidence_ids"])
-        for evidence_id in ids:
-            if not isinstance(evidence_id, str) or evidence_id not in allowed_evidence:
-                raise CombineError(f"{where}/{metric_id}: unknown evidence_id {evidence_id!r}")
-        row["_resolved_evidence_ids"] = list(dict.fromkeys(ids))
+        # A hallucinated evidence_id must never abort the company: drop it and
+        # let the fewer_than_two_distinct_sources gate reject the delta instead.
+        known = [
+            evidence_id for evidence_id in ids
+            if isinstance(evidence_id, str) and evidence_id in allowed_evidence
+        ]
+        row["_resolved_evidence_ids"] = list(dict.fromkeys(known))
         indexed[metric_id] = row
     if set(indexed) != set(metric_ids):
         raise CombineError(f"{where}: expected metrics {metric_ids}, got {sorted(indexed)}")

@@ -250,10 +250,15 @@ def _word_count(text: str) -> int:
 
 
 def _citation_lines(items: Sequence[EvidenceItem], indent: str = "  ") -> list[str]:
+    # Quotes are abbreviated in prose products (context/news) to hold the 600-word
+    # contract cap; full verbatim quotes live in the facts.md jsonl block, which
+    # is the machine-validated layer. Only used by context/news renderers.
     lines = []
     for item in items:
+        words = item.quote.strip().split()
+        quote = " ".join(words[:10]) + (" …" if len(words) > 10 else "")
         lines.append(
-            f'{indent}- Evidence `{item.source}` ({item.published_at}): "{item.quote.strip()}"'
+            f'{indent}- Evidence `{item.source}` ({item.published_at}): "{quote}"'
         )
     return lines
 
@@ -291,7 +296,7 @@ def _render_context(
         raise AnalysisError("context.risks must be a list")
     if risks:
         lines.extend(["", "## Risks and counterevidence"])
-    for index, risk in enumerate(risks, 1):
+    for index, risk in enumerate(risks[:3], 1):  # top-3 rendered; 600-word contract cap
         if not isinstance(risk, dict) or not isinstance(risk.get("claim"), str):
             raise AnalysisError(f"context risk {index}: invalid claim")
         evidence = _resolve_ids(
@@ -300,6 +305,13 @@ def _render_context(
         lines.extend(["", f"- {risk['claim'].strip()}"])
         lines.extend(_citation_lines(evidence))
     rendered = "\n".join(lines).rstrip() + "\n"
+    # deterministic backstop for the 600-word contract cap: shorten the summary
+    # sentence by sentence (cited outlooks and risks are never dropped here)
+    sentences = re.split(r"(?<=[.!?])\s+", summary.strip())
+    while _word_count(rendered) > 600 and len(sentences) > 1:
+        sentences = sentences[:-1]
+        lines[2] = " ".join(sentences)
+        rendered = "\n".join(lines).rstrip() + "\n"
     if _word_count(rendered) > 600:
         raise AnalysisError(f"context.md exceeds 600 words ({_word_count(rendered)})")
     return rendered
@@ -318,7 +330,7 @@ def _render_facts(
     metrics = {metric["metric_id"]: metric for metric in company["metrics"]}
     records = []
     prose = [f"# {company['company']} — curated facts", ""]
-    seen = set()
+    seen: dict[tuple, float] = {}
     for index, row in enumerate(rows, 1):
         if not isinstance(row, dict):
             raise AnalysisError(f"fact {index}: expected object")
@@ -336,8 +348,13 @@ def _render_facts(
             raise AnalysisError(f"fact {index}: value must be finite")
         identity = (metric_id, period)
         if identity in seen:
-            raise AnalysisError(f"fact {index}: duplicate metric/period {identity}")
-        seen.add(identity)
+            if seen[identity] == value:
+                continue  # exact duplicate emission — drop silently, keep first
+            raise AnalysisError(
+                f"fact {index}: duplicate metric/period {identity} with conflicting "
+                f"values {seen[identity]} vs {value}"
+            )
+        seen[identity] = value
         evidence = _resolve_ids(
             [evidence_id], available, cutoff=cutoff, where=f"fact {index}"
         )[0]

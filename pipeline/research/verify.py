@@ -86,6 +86,12 @@ def check_fact(
                 f"fact {mid}/{fact.get('period')}: basis {fact.get('basis')!r} must be "
                 f"{m['basis']!r} for this metric (manifest is authoritative)"
             )
+    for marker in config.QUOTE_DISQUALIFIERS.get(mid or "", []):
+        if marker in (quote or "").casefold():
+            problems.append(
+                f"fact {mid}/{fact.get('period')}: quote is a '{marker}' line, not "
+                f"'{(m or {}).get('label', mid)}' — quote the row stating the metric's own label"
+            )
     if not PERIOD_RE.match(fact.get("period", "")):
         problems.append(
             f"fact {mid}: bad period {fact.get('period')!r} (want FY2026, FY2026Q2, FY2026H1)"

@@ -1,0 +1,2 @@
+{"ts": "2026-08-16T15:55:57", "kind": "run_start", "run_id": "78c1f731", "companies": ["HD"], "cutoff": "2026-08-16", "models": {"custodian": "gpt-5.6-terra", "worker": "gpt-5.6-luna"}}
+{"ts": "2026-08-16T15:55:57", "kind": "company_start", "company_id": "HD", "metrics": ["hd_net_sales", "hd_adj_eps", "hd_comp_sales"]}

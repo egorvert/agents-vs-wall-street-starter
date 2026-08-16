@@ -137,6 +137,16 @@ def _numbers_in(text: str) -> list[float]:
     return [abs(float(match.group(0).replace(",", ""))) for match in NUMBER_RE.finditer(text)]
 
 
+def _granularity(value: int | float) -> float:
+    """Rounding granularity implied by a value's decimal representation:
+    39900 -> 100 (two trailing zeros), 192.1 -> 0.1, 197 -> 1, 3160.263 -> 0.001."""
+    text = f"{float(value):.6f}".rstrip("0").rstrip(".")
+    if "." in text:
+        return 10.0 ** -len(text.split(".")[1])
+    stripped = text.rstrip("0")
+    return float(10 ** (len(text) - len(stripped))) if stripped else 1.0
+
+
 def _close_enough(candidate: float, expected: float) -> bool:
     tolerance = max(0.005, expected * 0.001)
     return math.isclose(candidate, expected, rel_tol=0.0, abs_tol=tolerance)
@@ -153,6 +163,15 @@ def _value_is_recognisable(value: int | float, unit: str, quote: str) -> bool:
     quotes_billions = bool(re.search(r"\b(?:billion|bn)\b", quote_lower))
     if is_millions_unit and quotes_billions:
         return any(_close_enough(number * 1000.0, expected) for number in numbers)
+    if is_millions_unit:
+        # 10-Q/10-K statement tables are commonly denominated in thousands:
+        # "$ 3,160,263" supports a fact of 3160.263 USDm. Only accept the
+        # thousands reading for large quote numbers, so plain small figures
+        # can never alias into it.
+        return any(
+            number >= 100_000 and _close_enough(number / 1000.0, expected)
+            for number in numbers
+        )
     return False
 
 
@@ -332,6 +351,7 @@ def build_timeseries(
     )
 
     warnings: list[str] = []
+    labels = {metric["metric_id"]: metric.get("label", "") for metric in company["metrics"]}
     admitted: dict[tuple[str, str, str], Fact] = {}
     for fact in dossier_facts + curated_facts:
         fact_date = date.fromisoformat(fact.published_at)
@@ -348,6 +368,41 @@ def build_timeseries(
             admitted[fact.identity] = fact
             continue
         if fact.value != previous.value:
+            # Rounding-aware agreement: tolerate a gap up to half the coarser
+            # source's rounding granularity ("$39.9 billion" prose vs the exact
+            # 39,856 table are the same figure). Keep the more precise value.
+            # granularity capped at 1% of the value: "39.9 billion" prose rounds
+            # at 100M, but a round 1,200 does not imply +/-50 of slack
+            tolerance = max(
+                min(_granularity(v), abs(float(v)) * 0.01)
+                for v in (previous.value, fact.value)
+            ) / 2.0
+            if abs(fact.value - previous.value) <= tolerance:
+                more_precise = min(
+                    (previous, fact), key=lambda f: _granularity(f.value)
+                )
+                warnings.append(
+                    f"rounding variance {fact.metric_id}/{fact.period}: {previous.value} vs "
+                    f"{fact.value} — kept {more_precise.value}"
+                )
+                admitted[fact.identity] = more_precise
+                continue
+            # True conflict. If exactly one quote states the metric's own label
+            # verbatim, prefer it — the other is usually a near-miss line item
+            # (e.g. "earnings from operations" vs "pre-exceptional operating
+            # profit"). Otherwise refuse loudly.
+            label = labels.get(fact.metric_id, "")
+            prev_has = label.casefold() in previous.quote.casefold() if label else False
+            fact_has = label.casefold() in fact.quote.casefold() if label else False
+            if prev_has != fact_has:
+                keep = previous if prev_has else fact
+                drop = fact if prev_has else previous
+                warnings.append(
+                    f"label-preference {fact.metric_id}/{fact.period}: kept {keep.value} "
+                    f"(quote states '{label}') over {drop.value} ({drop.source})"
+                )
+                admitted[fact.identity] = keep
+                continue
             raise ExtractionError(
                 "conflicting facts for "
                 f"{fact.metric_id}/{fact.period}: {previous.value} ({previous.source}) vs "

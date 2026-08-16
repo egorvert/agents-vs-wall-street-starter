@@ -1,0 +1,11 @@
+{"ts": "2026-08-16T15:51:39", "kind": "run_start", "run_id": "1f9c9333", "companies": ["DE"], "cutoff": "2026-08-16", "models": {"custodian": "gpt-5.6-terra", "worker": "gpt-5.6-luna"}}
+{"ts": "2026-08-16T15:51:40", "kind": "company_start", "company_id": "DE", "metrics": ["de_net_sales", "de_eps_gaap", "de_ppa_op"]}
+{"ts": "2026-08-16T15:53:10", "kind": "worker_done", "company_id": "DE", "worker": "w1_custodian", "facts": 2, "claims": 0}
+{"ts": "2026-08-16T15:53:10", "kind": "worker_done", "company_id": "DE", "worker": "w2_guidance", "facts": 0, "claims": 4}
+{"ts": "2026-08-16T15:53:10", "kind": "rejected", "company_id": "DE", "worker": "w3_operating_model", "detail": "fact de_net_sales/FY2026Q2: value 13369 does not appear in its own quote — check scale (USDm means millions; percentages are points; GBp is pence)"}
+{"ts": "2026-08-16T15:53:10", "kind": "worker_done", "company_id": "DE", "worker": "w3_operating_model", "facts": 7, "claims": 5}
+{"ts": "2026-08-16T15:53:10", "kind": "worker_done", "company_id": "DE", "worker": "w4_demand_peers", "facts": 0, "claims": 4}
+{"ts": "2026-08-16T15:53:28", "kind": "challenges", "company_id": "DE", "kept": 3, "severities": ["medium", "medium", "medium"]}
+{"ts": "2026-08-16T15:53:28", "kind": "coverage", "company_id": "DE", "coverage": {"de_net_sales": {"historical_points": 4, "historical_ok": false, "guidance_present": false, "driver_claims": 3, "external_corroboration": true, "counterevidence_present": true}, "de_eps_gaap": {"historical_points": 3, "historical_ok": false, "guidance_present": false, "driver_claims": 2, "external_corroboration": false, "counterevidence_present": true}, "de_ppa_op": {"historical_points": 2, "historical_ok": false, "guidance_present": false, "driver_claims": 2, "external_corroboration": true, "counterevidence_present": true}}}
+{"ts": "2026-08-16T15:53:35", "kind": "dossier_written", "company_id": "DE", "path": "/Users/egorvert/Developer/agents-vs-wall-street-starter/out/DE/research/dossier.md", "chars": 26986, "facts": 9}
+{"ts": "2026-08-16T15:53:35", "kind": "run_done", "ok": 1, "total": 1}

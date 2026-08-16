@@ -50,6 +50,15 @@ DOC_DIRS = {
 
 DOSSIER_TOKEN_CAP = 8000  # ~4 chars/token heuristic applied in dossier.py
 
+# Per-metric quote disqualifiers: a fact whose quote contains one of these
+# markers is quoting a DIFFERENT statement line and gets rejected at the gate
+# (Hays' "profit before tax" rows mislabel as operating profit otherwise).
+QUOTE_DISQUALIFIERS: dict[str, list[str]] = {
+    "has_preexc_op": ["profit before tax", "earnings from operations"],
+    "has_preexc_eps": ["diluted earnings per share from continuing"],
+    "de_ppa_op": ["net sales"],
+}
+
 # Per-company query-pack hints — company reporting vocabulary differs (Hays
 # speaks "like-for-like"/"preliminary results", Deere guides on net income).
 # Versioned config, not code: extend per company as coverage reports show gaps.
