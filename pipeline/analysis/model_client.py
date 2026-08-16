@@ -5,26 +5,23 @@ from __future__ import annotations
 import hashlib
 import json
 import os
-import socket
 import tempfile
 import time
-import urllib.error
-import urllib.request
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable, Protocol
 
+from openai import OpenAI, OpenAIError
+
 
 DEFAULT_MODEL = "gpt-5.6-terra"
 DEFAULT_REASONING_EFFORT = "low"
-RESPONSES_URL = "https://api.openai.com/v1/responses"
-
 EventLogger = Callable[[dict[str, Any]], None]
 
 
 class ModelClientError(RuntimeError):
-    """Raised when a structured model request cannot be used safely."""
+    pass
 
 
 @dataclass(frozen=True)
@@ -79,8 +76,6 @@ def stable_hash(value: str | bytes | dict[str, Any]) -> str:
 
 
 class OpenAIResponsesClient:
-    """Direct REST adapter for strict Responses API structured output."""
-
     def __init__(
         self,
         *,
@@ -99,8 +94,12 @@ class OpenAIResponsesClient:
         self._cache_root = Path(cache_root) if cache_root is not None else None
         self._use_cache = use_cache
         self._logger = logger
-        self._timeout_seconds = timeout_seconds
         self._max_output_tokens = max_output_tokens
+        self._client = (
+            OpenAI(api_key=self._api_key, timeout=timeout_seconds, max_retries=2)
+            if self._api_key
+            else None
+        )
 
     def generate_json(
         self,
@@ -111,7 +110,7 @@ class OpenAIResponsesClient:
         schema: dict[str, Any],
         metadata: dict[str, Any] | None = None,
     ) -> ModelResult:
-        if not self._api_key:
+        if self._client is None:
             raise ModelClientError("OPENAI_API_KEY is required for live model calls")
 
         request_meta = dict(metadata or {})
@@ -168,18 +167,6 @@ class OpenAIResponsesClient:
             },
             "max_output_tokens": self._max_output_tokens,
         }
-        body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
-        request = urllib.request.Request(
-            RESPONSES_URL,
-            data=body,
-            method="POST",
-            headers={
-                "Authorization": f"Bearer {self._api_key}",
-                "Content-Type": "application/json",
-                "User-Agent": "agents-vs-wall-street/1.0",
-            },
-        )
-
         started = time.monotonic()
         emit_event(
             self._logger,
@@ -192,9 +179,20 @@ class OpenAIResponsesClient:
             schema_hash=schema_hash,
             **request_meta,
         )
-        raw_response = self._send_with_retries(request, request_meta)
+        try:
+            response = self._client.responses.create(**payload)
+        except OpenAIError as exc:
+            emit_event(
+                self._logger,
+                "model_request_failed",
+                model=self.model,
+                schema_name=schema_name,
+                error=type(exc).__name__,
+                **request_meta,
+            )
+            raise ModelClientError(f"OpenAI request failed: {exc}") from exc
         elapsed_ms = round((time.monotonic() - started) * 1000)
-        result = self._parse_response(raw_response)
+        result = self._parse_response(response.model_dump(mode="json"))
         emit_event(
             self._logger,
             "model_request_completed",
@@ -215,40 +213,6 @@ class OpenAIResponsesClient:
         if not self._use_cache or self._cache_root is None:
             return None
         return self._cache_root / "model" / f"{cache_key}.json"
-
-    def _send_with_retries(
-        self,
-        request: urllib.request.Request,
-        metadata: dict[str, Any],
-    ) -> dict[str, Any]:
-        for attempt in range(3):
-            try:
-                with urllib.request.urlopen(request, timeout=self._timeout_seconds) as response:
-                    return json.loads(response.read().decode("utf-8"))
-            except urllib.error.HTTPError as exc:
-                retryable = exc.code == 429 or 500 <= exc.code <= 599
-                if not retryable or attempt == 2:
-                    detail = exc.read().decode("utf-8", errors="replace")[:1_000]
-                    raise ModelClientError(f"OpenAI HTTP {exc.code}: {detail}") from exc
-                emit_event(
-                    self._logger,
-                    "model_request_retry",
-                    attempt=attempt + 1,
-                    reason=f"http_{exc.code}",
-                    **metadata,
-                )
-            except (urllib.error.URLError, TimeoutError, socket.timeout) as exc:
-                if attempt == 2:
-                    raise ModelClientError(f"OpenAI request failed after retries: {exc}") from exc
-                emit_event(
-                    self._logger,
-                    "model_request_retry",
-                    attempt=attempt + 1,
-                    reason=type(exc).__name__,
-                    **metadata,
-                )
-            time.sleep(2**attempt)
-        raise AssertionError("unreachable retry state")
 
     @staticmethod
     def _parse_response(response: dict[str, Any]) -> ModelResult:

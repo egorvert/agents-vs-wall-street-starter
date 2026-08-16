@@ -9,7 +9,12 @@ from datetime import datetime
 from pathlib import Path
 from typing import Sequence
 
-from pipeline.analysis.model_client import OpenAIResponsesClient, json_event_logger
+from pipeline.analysis.model_client import (
+    DEFAULT_MODEL,
+    ModelClientError,
+    OpenAIResponsesClient,
+    json_event_logger,
+)
 from pipeline.combine.core import CombineConfig, CombineError, run_combine
 from pipeline.quant.guardrails import GuardrailError
 
@@ -22,7 +27,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     selection.add_argument("--all", action="store_true", help="reconcile all four companies")
     parser.add_argument("--repo-root", default=str(repo_root))
     parser.add_argument("--out-root", default="out")
-    parser.add_argument("--model", default="gpt-5.6-terra")
+    parser.add_argument("--model", default=DEFAULT_MODEL)
     parser.add_argument("--no-cache", action="store_true")
     args = parser.parse_args(argv)
 
@@ -50,7 +55,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             datetime.now().astimezone(),
             json_event_logger,
         )
-    except (CombineError, GuardrailError, OSError, json.JSONDecodeError) as exc:
+    except (CombineError, GuardrailError, ModelClientError, OSError, json.JSONDecodeError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1
     return 0

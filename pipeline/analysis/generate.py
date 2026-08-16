@@ -24,6 +24,7 @@ from pipeline.analysis.evidence import (
 from pipeline.analysis.model_client import (
     DEFAULT_MODEL,
     EventLogger,
+    ModelClientError,
     OpenAIResponsesClient,
     StructuredModelClient,
     emit_event,
@@ -39,7 +40,7 @@ KINDS = ("consensus", "guidance_midpoint")
 
 
 class AnalysisError(ValueError):
-    """Raised when a generated analysis product violates its handoff contract."""
+    pass
 
 
 def _load_manifest(repo_root: Path) -> dict[str, Any]:
@@ -114,9 +115,8 @@ def _schemas(metric_ids: list[str]) -> dict[str, dict[str, Any]]:
                             "period": {"type": "string"},
                             "value": {"type": "number"},
                             "evidence_id": {"type": "string"},
-                            "commentary": {"type": "string"},
                         },
-                        ("metric_id", "period", "value", "evidence_id", "commentary"),
+                        ("metric_id", "period", "value", "evidence_id"),
                     ),
                     "minItems": 1,
                 }
@@ -478,7 +478,6 @@ def run_analysis(
     run_started_at: datetime,
     logger: EventLogger | None = json_event_logger,
 ) -> None:
-    """Generate and atomically publish one company's Contract B/C artifacts."""
     repo_root = Path(repo_root).resolve()
     out_root = Path(out_root).resolve()
     if run_started_at.tzinfo is None:
@@ -638,7 +637,14 @@ def main(argv: Sequence[str] | None = None) -> int:
     for company_id in company_ids:
         try:
             run_analysis(company_id, root, out, client, started, json_event_logger)
-        except (AnalysisError, EvidenceError, ExtractionError, OSError, json.JSONDecodeError) as exc:
+        except (
+            AnalysisError,
+            EvidenceError,
+            ExtractionError,
+            ModelClientError,
+            OSError,
+            json.JSONDecodeError,
+        ) as exc:
             failures.append(company_id)
             emit_event(json_event_logger, "analysis_failed", company_id=company_id, error=str(exc))
     if failures:

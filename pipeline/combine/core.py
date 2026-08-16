@@ -18,10 +18,11 @@ from pipeline.analysis.evidence import (
     build_evidence_catalog,
     evidence_map,
     parse_iso_date,
+    resolve_repo_source,
     select_evidence,
     validate_citation,
 )
-from pipeline.analysis.model_client import EventLogger, StructuredModelClient, emit_event
+from pipeline.analysis.model_client import DEFAULT_MODEL, EventLogger, StructuredModelClient, emit_event
 from pipeline.quant.guardrails import GuardrailError, anchor_bands, seasonal_naive_baselines
 
 
@@ -32,7 +33,7 @@ CONFIDENCE_RANK = {"low": 0, "medium": 1, "high": 2}
 
 
 class CombineError(ValueError):
-    """Raised when a tier-0 final cannot be produced safely."""
+    pass
 
 
 @dataclass(frozen=True)
@@ -42,7 +43,7 @@ class CombineConfig:
     raw_delta_range_fraction: Decimal = Decimal("0.50")
     max_deviations_batch: int = 3
     max_deviations_single: int = 1
-    model: str = "gpt-5.6-terra"
+    model: str = DEFAULT_MODEL
     reasoning_effort: str = "low"
     prompt_version: str = "v1"
 
@@ -69,10 +70,8 @@ class CompanyInputs:
     cutoff: date
     timeseries: dict[str, Any]
     ranges: dict[str, dict[str, Any]]
-    consensus: dict[str, Any]
     anchors: tuple[dict[str, Any], ...]
     b0: dict[str, Any]
-    dossier_path: Path
     context: str
     news: str
     evidence: tuple[EvidenceItem, ...]
@@ -282,11 +281,31 @@ def load_company_inputs(
     for path, label in ((dossier_path, "dossier"), (context_path, "context"), (news_path, "news")):
         if not path.is_file():
             raise CombineError(f"{company_id} {label} does not exist: {path}")
-    evidence = build_evidence_catalog(
-        repo_root=repo_root,
-        company_id=company_id,
-        dossier_path=dossier_path,
-        cutoff=cutoff,
+    context = context_path.read_text(encoding="utf-8")
+    news = news_path.read_text(encoding="utf-8")
+    cited_sources = {
+        source
+        for text in (context, news)
+        for source in re.findall(r"((?:challenge|out)/[^`),\s]+\.md)", text)
+    }
+    cited_sources.update(anchor["source"] for anchor in anchors)
+    cited_sources.update(
+        citation["source"]
+        for row in ranges.values()
+        for citation in row["evidence"]
+    )
+    source_paths = {dossier_path}
+    source_paths.update(resolve_repo_source(repo_root, source) for source in cited_sources)
+    evidence = tuple(
+        item
+        for item in build_evidence_catalog(
+            repo_root=repo_root,
+            company_id=company_id,
+            dossier_path=dossier_path,
+            cutoff=cutoff,
+            source_paths=tuple(source_paths),
+        )
+        if item.published_at
     )
     emit_event(
         logger,
@@ -301,19 +320,17 @@ def load_company_inputs(
         cutoff=cutoff,
         timeseries=timeseries,
         ranges=ranges,
-        consensus=consensus,
         anchors=anchors,
         b0=b0,
-        dossier_path=dossier_path,
-        context=context_path.read_text(encoding="utf-8"),
-        news=news_path.read_text(encoding="utf-8"),
+        context=context,
+        news=news,
         evidence=evidence,
     )
 
 
 def _response_schema(metric_ids: list[str]) -> dict[str, Any]:
     direction = {"type": "string", "enum": list(DIRECTIONS)}
-    evidence_ids = {"type": "array", "items": {"type": "string"}}
+    evidence_ids = {"type": "array", "items": {"type": "string"}, "minItems": 1}
     driver = {
         "type": "object",
         "properties": {
@@ -332,7 +349,6 @@ def _response_schema(metric_ids: list[str]) -> dict[str, Any]:
             "proposed_delta": {"type": "number"},
             "confidence": {"type": "string", "enum": list(CONFIDENCE)},
             "drivers": {"type": "array", "items": driver},
-            "evidence_ids": evidence_ids,
             "rationale": {"type": "string"},
         },
         "required": [
@@ -341,7 +357,6 @@ def _response_schema(metric_ids: list[str]) -> dict[str, Any]:
             "proposed_delta",
             "confidence",
             "drivers",
-            "evidence_ids",
             "rationale",
         ],
         "additionalProperties": False,
@@ -467,9 +482,8 @@ def _validate_model_metrics(
         if not isinstance(row.get("rationale"), str) or not row["rationale"].strip():
             raise CombineError(f"{where}/{metric_id}: rationale must be non-empty")
         ids = []
-        if not isinstance(row.get("evidence_ids"), list) or not isinstance(row.get("drivers"), list):
-            raise CombineError(f"{where}/{metric_id}: evidence_ids/drivers must be lists")
-        ids.extend(row["evidence_ids"])
+        if not isinstance(row.get("drivers"), list):
+            raise CombineError(f"{where}/{metric_id}: drivers must be a list")
         for driver_index, driver in enumerate(row["drivers"], 1):
             if not isinstance(driver, dict) or driver.get("direction") not in DIRECTIONS:
                 raise CombineError(f"{where}/{metric_id} driver {driver_index}: invalid object")
@@ -592,7 +606,6 @@ def propose_company(
     client: StructuredModelClient,
     logger: EventLogger | None = None,
 ) -> list[MetricCandidate]:
-    """Run structurally blind and revealed model passes for one company."""
     if company_id != inputs.company_id:
         raise CombineError("company_id does not match CompanyInputs")
     metric_ids = [metric["metric_id"] for metric in inputs.company["metrics"]]
@@ -747,7 +760,6 @@ def finalize_batch(
     config: CombineConfig,
     logger: EventLogger | None = None,
 ) -> dict[str, FinalPayload]:
-    """Apply evidence ranking, fixed shrinkage, rounding, and range clamps."""
     all_candidates = [candidate for rows in candidates_by_company.values() for candidate in rows]
     eligible = [candidate for candidate in all_candidates if candidate.eligible]
     eligible.sort(
@@ -788,7 +800,7 @@ def finalize_batch(
             if delta == 0:
                 evidence = []
                 if candidate.rejection_reasons:
-                    rationale = "Anchor retained: " + ", ".join(candidate.rejection_reasons) + "."
+                    rationale = "Anchor retained because the proposed delta failed validation."
                 elif candidate.eligible and not chosen:
                     rationale = "Anchor retained under the global deviation budget."
                 else:
@@ -854,7 +866,6 @@ def run_combine(
     run_started_at: datetime,
     logger: EventLogger | None = None,
 ) -> None:
-    """Run combine for a batch and atomically write each successful Contract F file."""
     if run_started_at.tzinfo is None:
         raise CombineError("run_started_at must be timezone-aware")
     repo_root = Path(repo_root).resolve()

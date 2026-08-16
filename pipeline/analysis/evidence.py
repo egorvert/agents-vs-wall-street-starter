@@ -17,7 +17,7 @@ NUMBER_RE = re.compile(r"(?<![\w.])[-+]?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?")
 
 
 class EvidenceError(ValueError):
-    """Raised when a source or model-selected evidence reference is inadmissible."""
+    pass
 
 
 @dataclass(frozen=True)
@@ -134,13 +134,14 @@ def build_evidence_catalog(
     company_id: str,
     dossier_path: Path,
     cutoff: date,
+    source_paths: Sequence[Path] | None = None,
     max_quote_chars: int = 1_800,
 ) -> tuple[EvidenceItem, ...]:
-    """Build stable paragraph-level evidence without performing external fetches."""
     repo_root = Path(repo_root).resolve()
     dossier_path = Path(dossier_path).resolve()
     catalog: dict[str, EvidenceItem] = {}
-    for path in _source_paths(repo_root, company_id, dossier_path):
+    paths = _source_paths(repo_root, company_id, dossier_path) if source_paths is None else source_paths
+    for path in sorted({Path(path).resolve() for path in paths}):
         raw = path.read_text(encoding="utf-8", errors="replace")
         metadata, body = parse_frontmatter(raw)
         relative = path.resolve().relative_to(repo_root).as_posix()
