@@ -7,6 +7,8 @@ from pathlib import Path
 
 from pipeline.quant.guardrails import (
     GuardrailError,
+    anchor_band,
+    anchor_bands,
     seasonal_naive_band,
     seasonal_naive_baselines,
     seasonal_naive_bands,
@@ -331,6 +333,88 @@ class YoyTrendBandTests(unittest.TestCase):
             set(output),
             {"metric_id", "unit", "basis", "low", "base", "high", "methods", "evidence", "notes"},
         )
+
+
+class AnchorBandTests(unittest.TestCase):
+    def anchor(
+        self,
+        *,
+        kind: str = "consensus",
+        value: object = 4.71,
+        unit: str = "USD / share",
+        published_at: str = "2026-08-15",
+        metric_id: str = "hd_adj_eps",
+    ) -> dict:
+        return {
+            "metric_id": metric_id,
+            "kind": kind,
+            "value": value,
+            "unit": unit,
+            "basis": "adjusted",
+            "source": "evidence/source.md",
+            "published_at": published_at,
+            "quote": f"reported anchor {value}",
+        }
+
+    def test_consensus_band_is_centered_on_the_anchor(self) -> None:
+        band = anchor_band(self.anchor())
+        width = 4.71 * 0.005
+        self.assertAlmostEqual(band.low, 4.71 - width)
+        self.assertAlmostEqual(band.base, 4.71)
+        self.assertAlmostEqual(band.high, 4.71 + width)
+        self.assertEqual(band.methods, ("consensus_anchor",))
+
+    def test_guidance_midpoint_uses_upper_half_bias(self) -> None:
+        anchor = self.anchor(
+            kind="guidance_midpoint",
+            value=1.0,
+            unit="%",
+            metric_id="hd_comp_sales",
+        )
+        anchor["basis"] = "as-reported"
+        band = anchor_band(anchor)
+        self.assertEqual((band.low, band.base, band.high), (0.0, 1.5, 2.0))
+        self.assertEqual(band.methods, ("guidance_upper_bias",))
+
+    def test_explicit_half_width_replaces_the_proxy_width(self) -> None:
+        band = anchor_band(self.anchor(), half_width=0.10)
+        self.assertAlmostEqual(band.low, 4.61)
+        self.assertAlmostEqual(band.high, 4.81)
+
+    def test_fixture_guidance_anchor_converts_to_a_contract_e_band(self) -> None:
+        document = json.loads((REPO / "fixtures" / "HD" / "consensus.json").read_text())
+        bands = anchor_bands(document, as_of="2026-08-16")
+        self.assertEqual(len(bands), 1)
+        output = bands[0].as_range()
+        self.assertEqual(output["metric_id"], "hd_comp_sales")
+        self.assertEqual((output["low"], output["base"], output["high"]), (0.0, 1.5, 2.0))
+
+    def test_post_cutoff_anchors_are_excluded(self) -> None:
+        document = {"anchors": [self.anchor(published_at="2026-08-17")]}
+        self.assertEqual(anchor_bands(document, as_of="2026-08-16"), ())
+
+    def test_duplicate_metric_kind_is_rejected(self) -> None:
+        anchor = self.anchor()
+        with self.assertRaisesRegex(GuardrailError, "duplicate 'consensus' anchor"):
+            anchor_bands({"anchors": [anchor, dict(anchor)]}, as_of="2026-08-16")
+
+    def test_rejects_unknown_kind_bad_value_and_bad_date(self) -> None:
+        cases = [
+            (self.anchor(kind="whisper"), "unsupported anchor kind"),
+            (self.anchor(value=math.nan), "finite number"),
+            (self.anchor(published_at="2026-02-30"), "invalid date"),
+        ]
+        for anchor, message in cases:
+            with self.subTest(message=message):
+                with self.assertRaisesRegex(GuardrailError, message):
+                    anchor_band(anchor)
+
+    def test_zero_money_anchor_requires_explicit_width(self) -> None:
+        anchor = self.anchor(value=0.0)
+        with self.assertRaisesRegex(GuardrailError, "requires an explicit"):
+            anchor_band(anchor)
+        band = anchor_band(anchor, half_width=0.01)
+        self.assertEqual((band.low, band.base, band.high), (-0.01, 0.0, 0.01))
 
 
 if __name__ == "__main__":

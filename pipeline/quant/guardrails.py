@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
+from datetime import date
 from statistics import median
 
 from pipeline.quant.extract_timeseries import canonical_period_type
@@ -18,12 +19,23 @@ class GuardrailError(ValueError):
 
 
 @dataclass(frozen=True)
-class EvidencePoint:
-    period: str
-    value: int | float
+class EvidenceCitation:
     source: str
     published_at: str
     quote: str
+
+    def as_citation(self) -> dict:
+        return {
+            "source": self.source,
+            "published_at": self.published_at,
+            "quote": self.quote,
+        }
+
+
+@dataclass(frozen=True)
+class EvidencePoint(EvidenceCitation):
+    period: str
+    value: int | float
 
     @classmethod
     def from_point(cls, point: dict) -> "EvidencePoint":
@@ -34,14 +46,6 @@ class EvidencePoint:
             published_at=point["published_at"],
             quote=point["quote"],
         )
-
-    def as_citation(self) -> dict:
-        return {
-            "source": self.source,
-            "published_at": self.published_at,
-            "quote": self.quote,
-        }
-
 
 @dataclass(frozen=True)
 class SeasonalNaiveEstimate:
@@ -410,3 +414,125 @@ def yoy_trend_bands(
         )
         for series in matching
     )
+
+
+def _iso_date(value: object, where: str) -> date:
+    if not isinstance(value, str) or len(value) != 10:
+        raise GuardrailError(f"{where}: expected YYYY-MM-DD date")
+    try:
+        parsed = date.fromisoformat(value)
+    except ValueError as exc:
+        raise GuardrailError(f"{where}: invalid date {value!r}") from exc
+    if parsed.isoformat() != value:
+        raise GuardrailError(f"{where}: expected canonical YYYY-MM-DD date")
+    return parsed
+
+
+def anchor_band(
+    anchor: dict,
+    *,
+    half_width: float | None = None,
+) -> GuardrailBand:
+    """Convert one validated consensus/guidance point into a deterministic band."""
+    if not isinstance(anchor, dict):
+        raise GuardrailError("anchor must be an object")
+    required = (
+        "metric_id",
+        "kind",
+        "value",
+        "unit",
+        "basis",
+        "source",
+        "published_at",
+        "quote",
+    )
+    missing = [field for field in required if anchor.get(field) in (None, "")]
+    if missing:
+        raise GuardrailError(f"anchor is missing required fields {missing}")
+    value = anchor["value"]
+    if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value):
+        raise GuardrailError(f"{anchor['metric_id']}: anchor value must be a finite number")
+    kind = anchor["kind"]
+    if kind not in {"consensus", "guidance_midpoint"}:
+        raise GuardrailError(f"{anchor['metric_id']}: unsupported anchor kind {kind!r}")
+    _iso_date(anchor["published_at"], f"{anchor['metric_id']} anchor")
+
+    if half_width is None:
+        minimum = _minimum_band_half_width(
+            metric_id=anchor["metric_id"],
+            unit=anchor["unit"],
+            base=float(value),
+            explicit_minimum=None,
+        )
+        width = minimum if kind == "consensus" else 2.0 * minimum
+    else:
+        width = _minimum_band_half_width(
+            metric_id=anchor["metric_id"],
+            unit=anchor["unit"],
+            base=float(value),
+            explicit_minimum=half_width,
+        )
+
+    point = float(value)
+    low = point - width
+    high = point + width
+    if kind == "consensus":
+        base = point
+        methods = ("consensus_anchor",)
+        notes = f"consensus-centered proxy band with half-width {width:g}"
+    else:
+        base = point + 0.5 * width
+        methods = ("guidance_upper_bias",)
+        notes = (
+            f"guidance midpoint proxy span {point:g} +/- {width:g}; base uses upper-half "
+            "position because explicit endpoints are not fields in Contract C"
+        )
+
+    citation = EvidenceCitation(
+        source=anchor["source"],
+        published_at=anchor["published_at"],
+        quote=anchor["quote"],
+    )
+    return GuardrailBand(
+        metric_id=anchor["metric_id"],
+        unit=anchor["unit"],
+        basis=anchor["basis"],
+        low=low,
+        base=base,
+        high=high,
+        methods=methods,
+        evidence=(citation,),
+        notes=notes,
+    )
+
+
+def anchor_bands(
+    consensus: dict,
+    *,
+    as_of: str,
+    half_widths: dict[str, float] | None = None,
+) -> tuple[GuardrailBand, ...]:
+    """Build point-in-time anchor bands, rejecting duplicate kinds per metric."""
+    if not isinstance(consensus, dict):
+        raise GuardrailError("consensus document must be an object")
+    anchors = consensus.get("anchors")
+    if not isinstance(anchors, list):
+        raise GuardrailError("consensus.anchors must be a list")
+    cutoff = _iso_date(as_of, "anchor cutoff")
+    overrides = half_widths or {}
+    seen: set[tuple[str, str]] = set()
+    bands = []
+    for index, anchor in enumerate(anchors, 1):
+        if not isinstance(anchor, dict):
+            raise GuardrailError(f"anchor {index} must be an object")
+        metric_id = anchor.get("metric_id")
+        kind = anchor.get("kind")
+        identity = (metric_id, kind)
+        if identity in seen:
+            raise GuardrailError(f"duplicate {kind!r} anchor for metric {metric_id!r}")
+        seen.add(identity)
+        published = _iso_date(anchor.get("published_at"), f"anchor {index}")
+        if published > cutoff:
+            continue
+        bands.append(anchor_band(anchor, half_width=overrides.get(metric_id)))
+    return tuple(bands)
