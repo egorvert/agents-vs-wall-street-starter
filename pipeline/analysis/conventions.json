@@ -1,0 +1,101 @@
+{
+  "schema_version": 1,
+  "metrics": {
+    "hd_net_sales": {
+      "definition": "Total-company reported sales; never substitute comparable sales or a U.S.-only measure.",
+      "citation": {
+        "source": "challenge/offline-data/home-depot/filings/2026-05-19__hd-us-20260519-q1-8k__1038584.md",
+        "published_at": "2026-05-19",
+        "quote": "The Home Depot , the world's largest home improvement retailer, today reported sales of $41.8 billion for the first quarter of fiscal 2026, an increase of $1.9 billion, or 4.8% from the first quarter of fiscal 2025."
+      }
+    },
+    "hd_adj_eps": {
+      "definition": "Non-GAAP adjusted diluted EPS excludes acquired-intangible amortization and its related tax effects.",
+      "citation": {
+        "source": "challenge/offline-data/home-depot/filings/2026-05-19__hd-us-20260519-q1-8k__1038584.md",
+        "published_at": "2026-05-19",
+        "quote": "The Company excludes the impact of amortization expense from acquired intangible assets from adjusted operating income and adjusted operating margin, and the impact of amortization expense from acquired intangible assets, including the related tax effects, from adjusted diluted earnings per share."
+      }
+    },
+    "hd_comp_sales": {
+      "definition": "Total-company comparable sales in percentage points, distinct from U.S. comparable sales.",
+      "citation": {
+        "source": "challenge/offline-data/home-depot/filings/2026-05-19__hd-us-20260519-q1-8k__1038584.md",
+        "published_at": "2026-05-19",
+        "quote": "Comparable sales for the first quarter of fiscal 2026 increased 0.6%, and comparable sales in the U.S. increased 0.4%."
+      }
+    },
+    "adi_revenue": {
+      "definition": "Reported quarterly company revenue, not a segment or adjusted revenue measure.",
+      "citation": {
+        "source": "challenge/offline-data/analog-devices/filings/2026-05-20__adi-us-20260520-q2-8k__1040581.md",
+        "published_at": "2026-05-20",
+        "quote": "Revenue of $3.62 billion, with year-over-year growth across all end markets, led by Industrial and Communications"
+      }
+    },
+    "adi_adj_eps": {
+      "definition": "Adjusted diluted EPS starts from GAAP diluted EPS and excludes acquisition-related expenses, special charges and tax-related items.",
+      "citation": {
+        "source": "challenge/offline-data/analog-devices/filings/2026-05-20__adi-us-20260520-q2-8k__1040581.md",
+        "published_at": "2026-05-20",
+        "quote": "Adjusted diluted EPS is defined as diluted EPS, determined in accordance with GAAP, excluding: acquisition related expenses, special charges, net, and tax related items, which are described further below."
+      }
+    },
+    "adi_adj_gm": {
+      "definition": "Adjusted gross margin percentage is adjusted gross margin divided by revenue; adjusted gross margin excludes acquisition-related expenses from GAAP gross margin.",
+      "citation": {
+        "source": "challenge/offline-data/analog-devices/filings/2026-05-20__adi-us-20260520-q2-8k__1040581.md",
+        "published_at": "2026-05-20",
+        "quote": "Adjusted gross margin is defined as gross margin, determined in accordance with GAAP, excluding: certain acquisition related expenses, which are described further below. Adjusted gross margin percentage represents adjusted gross margin divided by revenue."
+      }
+    },
+    "has_net_fees": {
+      "definition": "Full-year net fees are turnover less remuneration of temporary workers and other recruitment agencies.",
+      "citation": {
+        "source": "challenge/offline-data/hays/filings/2025-08-21__has-ln-20250821-filing__143845.md",
+        "published_at": "2025-08-21",
+        "quote": "Net fees comprise turnover less remuneration of temporary workers and other recruitment agencies."
+      }
+    },
+    "has_preexc_eps": {
+      "definition": "Full-year pre-exceptional basic EPS in pence, not post-exceptional EPS and not a half-year value.",
+      "citation": {
+        "source": "challenge/offline-data/hays/filings/2025-08-21__has-ln-20250821-filing__143845.md",
+        "published_at": "2025-08-21",
+        "quote": "The Group's pre-exceptional basic earnings per share (EPS) of 1.31p was 67% lower than the prior year."
+      }
+    },
+    "has_preexc_op": {
+      "definition": "Full-year Group operating profit before exceptional items in GBP millions, not a regional or post-exceptional result.",
+      "citation": {
+        "source": "challenge/offline-data/hays/filings/2025-08-21__has-ln-20250821-filing__143845.md",
+        "published_at": "2025-08-21",
+        "quote": "FY25 pre-exceptional{(2)} Group operating profit of £45.6 million represented a like-for-like decrease of 56% (down 57% reported) with a higher drop-through of lower net fees to profitability in the final quarter from broad-based weakness in Perm markets globally."
+      }
+    },
+    "de_net_sales": {
+      "definition": "Consolidated worldwide net sales and revenues, including Financial Services; do not substitute equipment-operations net sales.",
+      "citation": {
+        "source": "challenge/offline-data/deere/filings/2026-05-21__de-us-20260521-q2-8k__1042167.md",
+        "published_at": "2026-05-21",
+        "quote": "Worldwide net sales and revenues increased 5 percent, to $13.369 billion, for the second quarter of 2026 and rose 8 percent, to $22.981 billion, for six months. Net sales were $11.778 billion for the quarter and $19.779 billion for six months, compared with $11.171 billion and $17.980 billion last year, respectively."
+      }
+    },
+    "de_eps_gaap": {
+      "definition": "Consolidated fully diluted EPS as reported under GAAP; do not substitute an adjusted per-share measure.",
+      "citation": {
+        "source": "challenge/offline-data/deere/filings/2026-05-21__de-us-20260521-q2-8k__1042167.md",
+        "published_at": "2026-05-21",
+        "quote": "| Fully diluted EPS | ​ | $ | 6.55 | ​ | $ | 6.64 | ​ | ​ | ​ | $ | 8.97 | ​ | $ | 9.82 | ​ | ​ | ​ |"
+      }
+    },
+    "de_ppa_op": {
+      "definition": "Production & Precision Agriculture segment operating profit in USD millions, not segment sales or consolidated operating profit.",
+      "citation": {
+        "source": "challenge/offline-data/deere/filings/2026-05-21__de-us-20260521-q2-8k__1042167.md",
+        "published_at": "2026-05-21",
+        "quote": "| Operating profit | ​ | $ | 706 | ​ | $ | 1,148 | ​ | -39% | ​ |"
+      }
+    }
+  }
+}

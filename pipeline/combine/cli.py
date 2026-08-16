@@ -9,6 +9,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Sequence
 
+from pipeline.analysis.evidence import EvidenceError
 from pipeline.analysis.model_client import (
     DEFAULT_MODEL,
     ModelClientError,
@@ -55,7 +56,14 @@ def main(argv: Sequence[str] | None = None) -> int:
             datetime.now().astimezone(),
             json_event_logger,
         )
-    except (CombineError, GuardrailError, ModelClientError, OSError, json.JSONDecodeError) as exc:
+    except (
+        CombineError,
+        EvidenceError,
+        GuardrailError,
+        ModelClientError,
+        OSError,
+        json.JSONDecodeError,
+    ) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1
     return 0

@@ -13,6 +13,7 @@ from decimal import Decimal, ROUND_HALF_UP
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
+from pipeline.analysis.conventions import load_conventions
 from pipeline.analysis.evidence import (
     EvidenceItem,
     build_evidence_catalog,
@@ -38,8 +39,8 @@ class CombineError(ValueError):
 
 @dataclass(frozen=True)
 class CombineConfig:
-    money_model_share: Decimal = Decimal("0.30")
-    other_model_share: Decimal = Decimal("0.20")
+    # Rachel's HD smoke favored 75% B1; one global weight avoids fitting 12 noisy cases.
+    model_delta_share: Decimal = Decimal("0.25")
     raw_delta_range_fraction: Decimal = Decimal("0.50")
     max_deviations_batch: int = 3
     max_deviations_single: int = 1
@@ -47,13 +48,9 @@ class CombineConfig:
     reasoning_effort: str = "low"
     prompt_version: str = "v1"
 
-    def model_share(self, unit: str) -> Decimal:
-        return self.money_model_share if unit in {"USDm", "GBPm"} else self.other_model_share
-
     def as_log_record(self) -> dict[str, Any]:
         return {
-            "money_model_share": str(self.money_model_share),
-            "other_model_share": str(self.other_model_share),
+            "model_delta_share": str(self.model_delta_share),
             "raw_delta_range_fraction": str(self.raw_delta_range_fraction),
             "max_deviations_batch": self.max_deviations_batch,
             "max_deviations_single": self.max_deviations_single,
@@ -67,6 +64,7 @@ class CombineConfig:
 class CompanyInputs:
     company_id: str
     company: dict[str, Any]
+    conventions: dict[str, dict[str, Any]]
     cutoff: date
     timeseries: dict[str, Any]
     ranges: dict[str, dict[str, Any]]
@@ -249,6 +247,7 @@ def load_company_inputs(
         raise CombineError(f"unknown company_id {company_id!r}")
     company = companies[company_id]
     cutoff = _load_cutoff(repo_root)
+    conventions = load_conventions(repo_root, manifest, cutoff)
     company_root = out_root / company_id
     timeseries = _load_json(company_root / "timeseries.json", f"{company_id} timeseries")
     if timeseries.get("schema_version") != 1 or timeseries.get("company_id") != company_id:
@@ -294,6 +293,9 @@ def load_company_inputs(
         for row in ranges.values()
         for citation in row["evidence"]
     )
+    cited_sources.update(
+        conventions[metric_id]["citation"]["source"] for metric_id in expected_metrics
+    )
     source_paths = {dossier_path}
     source_paths.update(resolve_repo_source(repo_root, source) for source in cited_sources)
     evidence = tuple(
@@ -317,6 +319,7 @@ def load_company_inputs(
     return CompanyInputs(
         company_id=company_id,
         company=company,
+        conventions=conventions,
         cutoff=cutoff,
         timeseries=timeseries,
         ranges=ranges,
@@ -440,6 +443,7 @@ def _blind_packet(inputs: CompanyInputs) -> tuple[dict[str, Any], tuple[Evidence
                 "metric_id": metric_id,
                 "unit": metric["unit"],
                 "basis": metric["basis"],
+                "definition": inputs.conventions[metric_id]["definition"],
                 "b0": estimate.value,
                 "b0_method": estimate.method,
                 "historical_series": series[metric_id],
@@ -568,6 +572,7 @@ def _reveal_packet(
                 "metric_id": metric_id,
                 "unit": metric["unit"],
                 "basis": metric["basis"],
+                "definition": inputs.conventions[metric_id]["definition"],
                 "anchor": float(anchor),
                 "anchor_kind": anchor_kind,
                 "range": inputs.ranges[metric_id],
@@ -789,7 +794,7 @@ def finalize_batch(
             if chosen:
                 cap = candidate.range_width * config.raw_delta_range_fraction
                 capped_delta = _clamp(candidate.proposed_delta, -cap, cap)
-                unrounded = candidate.anchor + config.model_share(candidate.unit) * capped_delta
+                unrounded = candidate.anchor + config.model_delta_share * capped_delta
                 clamped = _clamp(unrounded, candidate.low, candidate.high)
                 places = _precision(candidate.anchor, candidate.low, candidate.base, candidate.high)
                 value = _clamp(_quantize(clamped, places), candidate.low, candidate.high)

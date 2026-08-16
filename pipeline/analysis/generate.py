@@ -13,6 +13,7 @@ from datetime import date, datetime
 from pathlib import Path
 from typing import Any, Sequence
 
+from pipeline.analysis.conventions import load_conventions
 from pipeline.analysis.evidence import (
     EvidenceError,
     EvidenceItem,
@@ -191,6 +192,7 @@ def _prompt_payload(
     company: dict[str, Any],
     cutoff: date,
     evidence: Sequence[EvidenceItem],
+    conventions: dict[str, dict[str, Any]],
 ) -> str:
     return json.dumps(
         {
@@ -199,6 +201,10 @@ def _prompt_payload(
             "target_period": company["period"],
             "cutoff": cutoff.isoformat(),
             "metrics": company["metrics"],
+            "metric_conventions": [
+                {"metric_id": metric["metric_id"], **conventions[metric["metric_id"]]}
+                for metric in company["metrics"]
+            ],
             "evidence": [item.prompt_record() for item in evidence],
         },
         indent=2,
@@ -488,6 +494,7 @@ def run_analysis(
         raise AnalysisError(f"unknown company_id {company_id!r}")
     company = companies[company_id]
     cutoff = _load_cutoff(repo_root)
+    conventions = load_conventions(repo_root, manifest, cutoff)
     dossier_path = out_root / company_id / "research" / "dossier.md"
     if not dossier_path.is_file():
         raise AnalysisError(f"research dossier does not exist: {dossier_path}")
@@ -551,6 +558,7 @@ def run_analysis(
                 company=company,
                 cutoff=cutoff,
                 evidence=selections[product],
+                conventions=conventions,
             ),
             schema=schemas[product],
             metadata={"stage": "analysis", "product": product, "company_id": company_id},
