@@ -18,6 +18,10 @@ class GuardrailError(ValueError):
     """Raised when a deterministic baseline cannot be computed safely."""
 
 
+class InsufficientHistoryError(GuardrailError):
+    """Raised when a method is valid but the time series is not yet deep enough."""
+
+
 @dataclass(frozen=True)
 class EvidenceCitation:
     source: str
@@ -346,7 +350,7 @@ def yoy_trend_band_for_series(
         raise GuardrailError(f"series is missing required fields {missing}")
     comparable = _validated_points(series, target_period)
     if len(comparable) < 3:
-        raise GuardrailError(
+        raise InsufficientHistoryError(
             f"{series['metric_id']}: YoY trend requires at least 3 comparable periods; "
             f"found {len(comparable)}"
         )
@@ -536,3 +540,163 @@ def anchor_bands(
             continue
         bands.append(anchor_band(anchor, half_width=overrides.get(metric_id)))
     return tuple(bands)
+
+
+BASE_PRIORITY = (
+    "consensus_anchor",
+    "guidance_upper_bias",
+    "yoy_trend_band",
+    "seasonal_naive_band",
+)
+
+
+def _base_method(band: GuardrailBand) -> str:
+    matches = [method for method in BASE_PRIORITY if method in band.methods]
+    if len(matches) != 1:
+        raise GuardrailError(
+            f"{band.metric_id}: band must identify exactly one base method from {BASE_PRIORITY}"
+        )
+    return matches[0]
+
+
+def combine_metric_bands(
+    bands: tuple[GuardrailBand, ...] | list[GuardrailBand],
+    *,
+    unavailable: tuple[str, ...] = (),
+) -> GuardrailBand:
+    """Combine available method bands with fixed base priority and a union envelope."""
+    if not bands:
+        raise GuardrailError("cannot combine an empty band collection")
+    first = bands[0]
+    if not isinstance(first, GuardrailBand):
+        raise GuardrailError("all combined bands must be GuardrailBand instances")
+
+    identities: set[str] = set()
+    for band in bands:
+        if not isinstance(band, GuardrailBand):
+            raise GuardrailError("all combined bands must be GuardrailBand instances")
+        if (band.metric_id, band.unit, band.basis) != (first.metric_id, first.unit, first.basis):
+            raise GuardrailError(
+                f"{first.metric_id}: cannot combine mismatched metric/unit/basis band "
+                f"{band.metric_id}/{band.unit}/{band.basis}"
+            )
+        if not (band.low <= band.base <= band.high):
+            raise GuardrailError(
+                f"{band.metric_id}: invalid component band {band.low}/{band.base}/{band.high}"
+            )
+        method = _base_method(band)
+        if method in identities:
+            raise GuardrailError(f"{band.metric_id}: duplicate component band {method}")
+        identities.add(method)
+
+    selected_method = next(method for method in BASE_PRIORITY if method in identities)
+    selected = next(band for band in bands if selected_method in band.methods)
+    low = min(band.low for band in bands)
+    high = max(band.high for band in bands)
+
+    methods: list[str] = []
+    evidence: list[EvidenceCitation] = []
+    seen_evidence: set[tuple[str, str, str]] = set()
+    for band in bands:
+        for method in band.methods:
+            if method not in methods:
+                methods.append(method)
+        for citation in band.evidence:
+            identity = (citation.source, citation.published_at, citation.quote)
+            if identity not in seen_evidence:
+                seen_evidence.add(identity)
+                evidence.append(citation)
+
+    unavailable_text = ", ".join(unavailable) if unavailable else "none"
+    component_text = ", ".join(_base_method(band) for band in bands)
+    return GuardrailBand(
+        metric_id=first.metric_id,
+        unit=first.unit,
+        basis=first.basis,
+        low=low,
+        base=selected.base,
+        high=high,
+        methods=tuple(methods),
+        evidence=tuple(evidence),
+        notes=(
+            f"base selected by fixed priority: {selected_method}; union envelope from "
+            f"{component_text}; unavailable: {unavailable_text}"
+        ),
+    )
+
+
+def build_ranges_document(
+    timeseries: dict,
+    consensus: dict,
+    *,
+    target_period: str,
+    as_of: str,
+    minimum_half_widths: dict[str, float] | None = None,
+    anchor_half_widths: dict[str, float] | None = None,
+) -> dict:
+    """Build the complete closed Contract E document for one company."""
+    if not isinstance(timeseries, dict):
+        raise GuardrailError("timeseries must be an object")
+    company_id = timeseries.get("company_id")
+    if not isinstance(company_id, str) or not company_id:
+        raise GuardrailError("timeseries.company_id must be a non-empty string")
+    if not isinstance(consensus, dict):
+        raise GuardrailError("consensus document must be an object")
+    consensus_company = consensus.get("company_id")
+    if consensus_company != company_id:
+        raise GuardrailError(
+            f"company_id mismatch: timeseries={company_id!r}, consensus={consensus_company!r}"
+        )
+
+    minimums = minimum_half_widths or {}
+    _, matching = _matching_series(timeseries, target_period)
+    series_by_metric = {series["metric_id"]: series for series in matching}
+    anchors = anchor_bands(
+        consensus,
+        as_of=as_of,
+        half_widths=anchor_half_widths,
+    )
+    anchor_by_metric: dict[str, list[GuardrailBand]] = {}
+    for band in anchors:
+        if band.metric_id not in series_by_metric:
+            raise GuardrailError(
+                f"anchor metric {band.metric_id!r} has no matching {target_period} time series"
+            )
+        anchor_by_metric.setdefault(band.metric_id, []).append(band)
+
+    ranges = []
+    for series in matching:
+        metric_id = series["metric_id"]
+        unavailable = []
+        component_bands = [
+            seasonal_naive_band(
+                seasonal_naive_for_series(series, target_period),
+                minimum_half_width=minimums.get(metric_id),
+            )
+        ]
+        try:
+            component_bands.append(
+                yoy_trend_band_for_series(
+                    series,
+                    target_period,
+                    minimum_half_width=minimums.get(metric_id),
+                )
+            )
+        except InsufficientHistoryError as exc:
+            unavailable.append(f"yoy_trend_band ({exc})")
+
+        metric_anchors = anchor_by_metric.get(metric_id, [])
+        component_bands.extend(metric_anchors)
+        anchor_methods = {_base_method(band) for band in metric_anchors}
+        if "consensus_anchor" not in anchor_methods:
+            unavailable.append("consensus_anchor")
+        if "guidance_upper_bias" not in anchor_methods:
+            unavailable.append("guidance_upper_bias")
+
+        combined = combine_metric_bands(
+            component_bands,
+            unavailable=tuple(unavailable),
+        )
+        ranges.append(combined.as_range())
+
+    return {"schema_version": 1, "company_id": company_id, "ranges": ranges}
