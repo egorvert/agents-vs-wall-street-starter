@@ -239,5 +239,59 @@ class RangeDocumentTests(unittest.TestCase):
             self.assertEqual(len(json.loads(output.read_text())["ranges"]), 3)
 
 
+class AllCompanyContractReadinessTests(unittest.TestCase):
+    def test_all_twelve_manifest_metrics_materialize_exact_contract_ranges(self) -> None:
+        manifest = json.loads((REPO / "schemas" / "metrics.json").read_text())["companies"]
+
+        for company_id, company in manifest.items():
+            with self.subTest(company_id=company_id):
+                target_period = company["period"]
+                if company["period_type"] == "Q":
+                    suffix = target_period[-2:]
+                    historical_periods = [f"FY{year}{suffix}" for year in (2023, 2024, 2025)]
+                else:
+                    historical_periods = [f"FY{year}" for year in (2023, 2024, 2025)]
+
+                series = []
+                for metric_index, metric in enumerate(company["metrics"], start=1):
+                    start = 10.0 * metric_index if metric["unit"] in {"%", "GBp"} else 1000.0 * metric_index
+                    series.append(
+                        {
+                            "metric_id": metric["metric_id"],
+                            "unit": metric["unit"],
+                            "basis": metric["basis"],
+                            "period_type": company["period_type"],
+                            "points": [
+                                point(period, start + offset)
+                                for offset, period in enumerate(historical_periods)
+                            ],
+                        }
+                    )
+
+                document = build_ranges_document(
+                    {"schema_version": 1, "company_id": company_id, "series": series},
+                    {
+                        "schema_version": 1,
+                        "company_id": company_id,
+                        "retrieved_at": "2026-08-16T10:00:00+01:00",
+                        "anchors": [],
+                    },
+                    target_period=target_period,
+                    as_of="2026-08-16",
+                )
+                ranges = {item["metric_id"]: item for item in document["ranges"]}
+
+                self.assertEqual(document["company_id"], company_id)
+                self.assertEqual(set(ranges), {metric["metric_id"] for metric in company["metrics"]})
+                for metric in company["metrics"]:
+                    item = ranges[metric["metric_id"]]
+                    self.assertEqual(item["unit"], metric["unit"])
+                    self.assertEqual(item["basis"], metric["basis"])
+                    self.assertLessEqual(item["low"], item["base"])
+                    self.assertLessEqual(item["base"], item["high"])
+                    self.assertIn("seasonal_naive_band", item["methods"])
+                    self.assertIn("yoy_trend_band", item["methods"])
+
+
 if __name__ == "__main__":
     unittest.main()
