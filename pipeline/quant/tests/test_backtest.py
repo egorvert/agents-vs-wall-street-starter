@@ -131,9 +131,9 @@ class BacktestConfigurationTests(unittest.TestCase):
         self.assertEqual(configs["b1_anchor"][metric], 1.0)
         self.assertEqual(configs["current_ranges_base"][metric], 1.5)
         self.assertEqual(configs["blend_b1_25"][metric], 1.75)  # damped %-drift (16:45) — Rachel to review
-        self.assertEqual(configs["blend_b1_50"][metric], 3.0)
-        self.assertEqual(configs["blend_b1_75"][metric], 2.0)
-        self.assertEqual((ranges[metric]["low"], ranges[metric]["high"]), (0.0, 9.0))
+        self.assertEqual(configs["blend_b1_50"][metric], 1.5)   # damped %-drift (16:45) — Rachel to review
+        self.assertEqual(configs["blend_b1_75"][metric], 1.25)  # damped %-drift (16:45) — Rachel to review
+        self.assertEqual((ranges[metric]["low"], ranges[metric]["high"]), (0.0, 3.0))  # damped %-drift (16:45) — Rachel to review
         self.assertEqual(proxy_kinds[metric], "guidance_midpoint")
 
     def test_scores_all_configs_on_the_same_held_out_actual(self) -> None:
@@ -146,7 +146,7 @@ class BacktestConfigurationTests(unittest.TestCase):
         self.assertEqual(summaries["current_ranges_base"].mean_official_score, 0.5)
         self.assertEqual(summaries["blend_b1_75"].mean_official_score, 0.75)  # damped %-drift (16:45) — Rachel to review
         self.assertEqual(summaries["blend_b1_75"].win_rate_vs_proxy, 1.0)
-        self.assertEqual(summaries["blend_b1_50"].tie_rate_vs_proxy, 1.0)
+        self.assertEqual(summaries["blend_b1_50"].tie_rate_vs_proxy, 0.0)  # damped %-drift: blend now beats proxy outright — Rachel to review
         self.assertEqual(result.proxy_usage[0].kind, "guidance_midpoint")
         self.assertEqual(len(result.metric_summaries), 6)
 
