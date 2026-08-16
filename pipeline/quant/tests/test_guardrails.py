@@ -7,7 +7,9 @@ from pathlib import Path
 
 from pipeline.quant.guardrails import (
     GuardrailError,
+    seasonal_naive_band,
     seasonal_naive_baselines,
+    seasonal_naive_bands,
     seasonal_naive_for_series,
 )
 
@@ -69,6 +71,39 @@ class HdBaselineTests(unittest.TestCase):
         self.assertAlmostEqual(comp.value, 5.3)
         self.assertAlmostEqual(comp.trend, 4.3)
         self.assertEqual(comp.method, "seasonal_naive_additive_drift")
+
+    def test_builds_hd_seasonal_bands_from_move_and_floor(self) -> None:
+        bands = {
+            band.metric_id: band
+            for band in seasonal_naive_bands(self.timeseries, "FY2026Q2")
+        }
+
+        sales = bands["hd_net_sales"]
+        sales_move = abs(self.estimates["hd_net_sales"].value - 45277.0)
+        self.assertAlmostEqual(sales.low, sales.base - sales_move)
+        self.assertAlmostEqual(sales.high, sales.base + sales_move)
+
+        eps = bands["hd_adj_eps"]
+        eps_floor = abs(eps.base) * 0.005
+        self.assertAlmostEqual(eps.low, eps.base - eps_floor)
+        self.assertAlmostEqual(eps.high, eps.base + eps_floor)
+
+        comp = bands["hd_comp_sales"]
+        self.assertAlmostEqual(comp.low, 1.0)
+        self.assertAlmostEqual(comp.high, 9.6)
+        self.assertEqual(comp.methods[0], "seasonal_naive_band")
+
+    def test_band_serializes_to_the_closed_contract_e_shape(self) -> None:
+        band = seasonal_naive_band(self.estimates["hd_adj_eps"])
+        output = band.as_range()
+        self.assertEqual(
+            set(output),
+            {"metric_id", "unit", "basis", "low", "base", "high", "methods", "evidence", "notes"},
+        )
+        self.assertEqual(
+            set(output["evidence"][0]),
+            {"source", "published_at", "quote"},
+        )
 
 
 class SeasonalNaiveRulesTests(unittest.TestCase):
@@ -170,6 +205,25 @@ class SeasonalNaiveRulesTests(unittest.TestCase):
             seasonal_naive_for_series(series([point("2025 Q2", 10.0)]), "FY2026Q2")
         with self.assertRaisesRegex(GuardrailError, "must be an object"):
             seasonal_naive_baselines({"series": ["not-a-series"]}, "FY2026Q2")
+
+    def test_one_point_band_uses_the_minimum_floor(self) -> None:
+        estimate = seasonal_naive_for_series(series([point("FY2025Q2", 100.0)]), "FY2026Q2")
+        band = seasonal_naive_band(estimate)
+        self.assertEqual((band.low, band.base, band.high), (99.5, 100.0, 100.5))
+
+    def test_zero_level_requires_an_explicit_minimum(self) -> None:
+        estimate = seasonal_naive_for_series(series([point("FY2025Q2", 0.0)]), "FY2026Q2")
+        with self.assertRaisesRegex(GuardrailError, "requires an explicit"):
+            seasonal_naive_band(estimate)
+        band = seasonal_naive_band(estimate, minimum_half_width=1.0)
+        self.assertEqual((band.low, band.base, band.high), (-1.0, 0.0, 1.0))
+
+    def test_rejects_invalid_explicit_minimum_widths(self) -> None:
+        estimate = seasonal_naive_for_series(series([point("FY2025Q2", 100.0)]), "FY2026Q2")
+        for width in (True, 0, -1, math.nan, math.inf):
+            with self.subTest(width=width):
+                with self.assertRaisesRegex(GuardrailError, "positive finite"):
+                    seasonal_naive_band(estimate, minimum_half_width=width)
 
 
 if __name__ == "__main__":

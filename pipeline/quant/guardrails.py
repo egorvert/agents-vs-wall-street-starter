@@ -34,6 +34,13 @@ class EvidencePoint:
             quote=point["quote"],
         )
 
+    def as_citation(self) -> dict:
+        return {
+            "source": self.source,
+            "published_at": self.published_at,
+            "quote": self.quote,
+        }
+
 
 @dataclass(frozen=True)
 class SeasonalNaiveEstimate:
@@ -49,6 +56,33 @@ class SeasonalNaiveEstimate:
     @property
     def comparable_periods(self) -> tuple[str, ...]:
         return tuple(point.period for point in self.evidence)
+
+
+@dataclass(frozen=True)
+class GuardrailBand:
+    metric_id: str
+    unit: str
+    basis: str
+    low: float
+    base: float
+    high: float
+    methods: tuple[str, ...]
+    evidence: tuple[EvidencePoint, ...]
+    notes: str
+
+    def as_range(self) -> dict:
+        """Return exactly the per-metric fields allowed by Contract E."""
+        return {
+            "metric_id": self.metric_id,
+            "unit": self.unit,
+            "basis": self.basis,
+            "low": self.low,
+            "base": self.base,
+            "high": self.high,
+            "methods": list(self.methods),
+            "evidence": [point.as_citation() for point in self.evidence],
+            "notes": self.notes,
+        }
 
 
 def _guardrail_period_type(period: object, where: str) -> str:
@@ -198,3 +232,80 @@ def seasonal_naive_baselines(timeseries: dict, target_period: str) -> tuple[Seas
         seen_metrics.add(metric_id)
         estimates.append(seasonal_naive_for_series(series, target_period))
     return tuple(estimates)
+
+
+def _minimum_band_half_width(
+    estimate: SeasonalNaiveEstimate,
+    explicit_minimum: float | None,
+) -> float:
+    if explicit_minimum is not None:
+        if (
+            isinstance(explicit_minimum, bool)
+            or not isinstance(explicit_minimum, (int, float))
+            or not math.isfinite(explicit_minimum)
+            or explicit_minimum <= 0
+        ):
+            raise GuardrailError("minimum_half_width must be a positive finite number")
+        return float(explicit_minimum)
+    if estimate.unit == "%":
+        return 0.5
+    proxy = abs(estimate.value) * 0.005
+    if proxy == 0:
+        raise GuardrailError(
+            f"{estimate.metric_id}: zero B0 requires an explicit money/EPS minimum_half_width"
+        )
+    return proxy
+
+
+def seasonal_naive_band(
+    estimate: SeasonalNaiveEstimate,
+    *,
+    minimum_half_width: float | None = None,
+) -> GuardrailBand:
+    """Create a symmetric, evidence-backed band around a seasonal-naive B0.
+
+    The observed component is the magnitude of the projected move from the latest
+    comparable actual to B0. The minimum component mirrors the official 0.5pp
+    percentage floor or uses 0.5% of |B0| as the pre-results proxy for money/EPS.
+    """
+    if not isinstance(estimate, SeasonalNaiveEstimate):
+        raise GuardrailError("seasonal_naive_band requires a SeasonalNaiveEstimate")
+    latest_value = float(estimate.evidence[-1].value)
+    observed_move = abs(estimate.value - latest_value)
+    minimum = _minimum_band_half_width(estimate, minimum_half_width)
+    half_width = max(observed_move, minimum)
+    low = estimate.value - half_width
+    high = estimate.value + half_width
+    if not all(math.isfinite(value) for value in (low, estimate.value, high)):
+        raise GuardrailError(f"{estimate.metric_id}: seasonal-naive band is not finite")
+    return GuardrailBand(
+        metric_id=estimate.metric_id,
+        unit=estimate.unit,
+        basis=estimate.basis,
+        low=low,
+        base=estimate.value,
+        high=high,
+        methods=("seasonal_naive_band", estimate.method),
+        evidence=estimate.evidence,
+        notes=(
+            f"B0 for {estimate.target_period}; symmetric half-width {half_width:g} is the larger "
+            f"of projected seasonal move {observed_move:g} and minimum {minimum:g}"
+        ),
+    )
+
+
+def seasonal_naive_bands(
+    timeseries: dict,
+    target_period: str,
+    *,
+    minimum_half_widths: dict[str, float] | None = None,
+) -> tuple[GuardrailBand, ...]:
+    """Build one seasonal-naive band for each available target-period metric."""
+    overrides = minimum_half_widths or {}
+    return tuple(
+        seasonal_naive_band(
+            estimate,
+            minimum_half_width=overrides.get(estimate.metric_id),
+        )
+        for estimate in seasonal_naive_baselines(timeseries, target_period)
+    )
