@@ -17,6 +17,7 @@ Fallback chain per metric (§5): 0 combine → 1 range base → 2 consensus anch
 from __future__ import annotations
 
 import argparse
+import asyncio
 import datetime
 import json
 import shutil
@@ -122,13 +123,27 @@ def run_company(cid: str, stub: bool) -> None:
             (root / "final.json").write_text(json.dumps(
                 {"schema_version": 1, "company_id": cid, "finals": stub_finals}, indent=2))
     else:
-        # TODO 🔴 research swarm -> out/<cid>/research/dossier.md
+        # 🔴 research swarm -> out/<cid>/research/dossier.md (Stage A live)
+        from research.swarm import amain as research_main
+        if asyncio.run(research_main([cid])) != 0:
+            raise SystemExit(f"{cid}: research swarm failed")
         # TODO 🟢 analysis      -> out/<cid>/analysis/* + consensus.json
         # TODO 🔵 quant         -> out/<cid>/timeseries.json + ranges.json
         # TODO 🟢 combine       -> out/<cid>/final.json
-        raise SystemExit(f"{cid}: real pipeline stages not wired yet — use --stub")
+        downstream = ("consensus.json", "timeseries.json", "ranges.json")
+        if not any((root / f).exists() for f in downstream):
+            log(f"{cid}: research stage done -> {root / 'research'}; downstream "
+                f"stages not wired yet — stopping before finals/workbook")
+            return
 
-    resolved = resolve_finals(cid, root)
+    try:
+        resolved = resolve_finals(cid, root)
+    except RuntimeError as e:
+        if stub:
+            raise
+        log(f"{cid}: downstream stages not wired yet ({e}) — research outputs are "
+            f"in {root / 'research'}; no workbook written")
+        return
     (root / "final.json").write_text(json.dumps(resolved, indent=2))
     log(f"{cid}: final.json normalised "
         f"(tiers: {[f['fallback_tier'] for f in resolved['finals']]})")

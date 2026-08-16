@@ -1,0 +1,7 @@
+{"ts": "2026-08-16T13:44:27", "kind": "run_start", "run_id": "0c920150", "companies": ["HD"], "cutoff": "2026-08-16", "models": {"custodian": "gpt-5.6-terra", "worker": "gpt-5.6-luna"}}
+{"ts": "2026-08-16T13:44:27", "kind": "company_start", "company_id": "HD", "metrics": ["hd_net_sales", "hd_adj_eps", "hd_comp_sales"]}
+{"ts": "2026-08-16T13:45:11", "kind": "worker_done", "company_id": "HD", "worker": "w1_custodian", "facts": 34, "claims": 4}
+{"ts": "2026-08-16T13:45:11", "kind": "worker_done", "company_id": "HD", "worker": "w2_guidance", "facts": 1, "claims": 4}
+{"ts": "2026-08-16T13:45:11", "kind": "coverage", "company_id": "HD", "coverage": {"hd_net_sales": {"historical_points": 11, "historical_ok": true, "guidance_present": false, "driver_claims": 0, "external_corroboration": false, "counterevidence_present": true}, "hd_adj_eps": {"historical_points": 14, "historical_ok": true, "guidance_present": false, "driver_claims": 0, "external_corroboration": false, "counterevidence_present": true}, "hd_comp_sales": {"historical_points": 9, "historical_ok": true, "guidance_present": true, "driver_claims": 0, "external_corroboration": false, "counterevidence_present": true}}}
+{"ts": "2026-08-16T13:45:11", "kind": "dossier_written", "company_id": "HD", "path": "/Users/egorvert/Developer/agents-vs-wall-street-starter/out/HD/research/dossier.md", "chars": 31945, "facts": 35}
+{"ts": "2026-08-16T13:45:11", "kind": "run_done", "ok": 1, "total": 1}

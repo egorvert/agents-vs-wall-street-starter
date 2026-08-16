@@ -1,0 +1,7 @@
+{"ts": "2026-08-16T14:00:03", "kind": "run_start", "run_id": "b66f0070", "companies": ["ADI"], "cutoff": "2026-08-16", "models": {"custodian": "gpt-5.6-terra", "worker": "gpt-5.6-luna"}}
+{"ts": "2026-08-16T14:00:03", "kind": "company_start", "company_id": "ADI", "metrics": ["adi_revenue", "adi_adj_eps", "adi_adj_gm"]}
+{"ts": "2026-08-16T14:00:18", "kind": "worker_done", "company_id": "ADI", "worker": "w1_custodian", "facts": 22, "claims": 4}
+{"ts": "2026-08-16T14:00:18", "kind": "worker_done", "company_id": "ADI", "worker": "w2_guidance", "facts": 3, "claims": 4}
+{"ts": "2026-08-16T14:00:18", "kind": "coverage", "company_id": "ADI", "coverage": {"adi_revenue": {"historical_points": 8, "historical_ok": true, "guidance_present": true, "driver_claims": 0, "external_corroboration": false, "counterevidence_present": true}, "adi_adj_eps": {"historical_points": 7, "historical_ok": false, "guidance_present": true, "driver_claims": 1, "external_corroboration": false, "counterevidence_present": true}, "adi_adj_gm": {"historical_points": 7, "historical_ok": false, "guidance_present": false, "driver_claims": 1, "external_corroboration": false, "counterevidence_present": true}}}
+{"ts": "2026-08-16T14:00:18", "kind": "dossier_written", "company_id": "ADI", "path": "/Users/egorvert/Developer/agents-vs-wall-street-starter/out/ADI/research/dossier.md", "chars": 24361, "facts": 24}
+{"ts": "2026-08-16T14:00:18", "kind": "run_done", "ok": 1, "total": 1}
