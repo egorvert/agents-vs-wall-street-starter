@@ -137,7 +137,7 @@
     <header class="hero">
       <p class="eyebrow">Forecasting system · architecture</p>
       <h1>Evidence breadth, deterministic magnitude, measurable improvement.</h1>
-      <p class="lede">The system turns a dated evidence archive into cited qualitative signals, a backtestable quantitative forecast and a bounded final judgment. Each reported result becomes labelled training and evaluation data for the next version.</p>
+      <p class="lede">The system turns a dated evidence archive into cited qualitative signals, a backtestable quantitative forecast and a bounded final judgment. Each reported result evaluates deterministic modules now and builds labelled data for future learned modules.</p>
       <div class="principles" aria-label="Core architectural principles">
         <div class="principle"><strong>Ground every signal</strong><span>Source, date, quote, metric, unit and basis.</span></div>
         <div class="principle"><strong>Separate judgment from math</strong><span>Models propose drivers; code computes values.</span></div>
@@ -180,7 +180,7 @@
               <rect x="20" y="110" width="920" height="300" rx="14" fill="#fff4f2" stroke="#c83f38" stroke-width="1.7"/>
               <text x="40" y="140" font-size="13" font-weight="800" letter-spacing="1.4" fill="#a23838">1 · FOUNDATIONAL RESEARCH SWARM</text>
               <text x="920" y="140" text-anchor="end" font-size="11" fill="#596579" font-family="ui-monospace, Menlo, monospace">pipeline/research/</text>
-              <text x="40" y="163" font-size="12.5" fill="#596579">Distinct perspectives share one evidence packet: claims, direction, sources, counterevidence and falsifiers—never a forecast level.</text>
+              <text x="40" y="163" font-size="12.5" fill="#596579">Ten designed perspectives are synthesized by four clean-context agents; cited outputs are merged and challenged—never averaged into a forecast.</text>
               <g fill="#fff" stroke="#dfaaa6" stroke-width="1.1" font-size="11.5" text-anchor="middle">
                 <rect x="40" y="180" width="168" height="40" rx="7"/><text x="124" y="205" fill="#513438" stroke="none">Metric + history</text>
                 <rect x="218" y="180" width="168" height="40" rx="7"/><text x="302" y="205" fill="#513438" stroke="none">Management guidance</text>
@@ -193,11 +193,19 @@
                 <rect x="574" y="230" width="168" height="40" rx="7"/><text x="658" y="255" fill="#513438" stroke="none">Street expectations</text>
                 <rect x="752" y="230" width="168" height="40" rx="7"/><text x="836" y="249" fill="#513438" stroke="none"><tspan x="836">Accounting +</tspan><tspan x="836" dy="14">capital structure</tspan></text>
               </g>
-              <text x="40" y="296" font-size="11.5" font-weight="700" fill="#a23838">Implemented today: four consolidated research lenses plus a separate counterevidence pass.</text>
-              <text x="40" y="320" font-size="11.2" fill="#596579"><tspan font-weight="700">Conditional routing:</tspan> product cycle · M&amp;A · regulation/litigation · geopolitics/trade · weather/calendar · market-implied uncertainty</text>
-              <text x="40" y="342" font-size="11.2" fill="#596579"><tspan font-weight="700">Challenge passes:</tspan> counterevidence now; variant perception and bull/bear as designed extensions</text>
-              <rect x="40" y="357" width="880" height="34" rx="7" fill="#fff" stroke="#dfaaa6" stroke-width="1.1"/>
-              <text x="480" y="379" text-anchor="middle" font-size="11.2" fill="#596579">Code gates · source/date/quote · metric/unit/basis · period/scale · near-miss line items · coverage gaps</text>
+              <g fill="#fff" stroke="#dfaaa6" stroke-width="1.1" font-size="10.8" text-anchor="middle" font-weight="700">
+                <rect x="40" y="282" width="208" height="31" rx="7"/><text x="144" y="302" fill="#513438" stroke="none">W1 · facts + history</text>
+                <rect x="264" y="282" width="208" height="31" rx="7"/><text x="368" y="302" fill="#513438" stroke="none">W2 · guidance</text>
+                <rect x="488" y="282" width="208" height="31" rx="7"/><text x="592" y="302" fill="#513438" stroke="none">W3 · operating bridge</text>
+                <rect x="712" y="282" width="208" height="31" rx="7"/><text x="816" y="302" fill="#513438" stroke="none">W4 · demand + peers</text>
+              </g>
+              <text x="480" y="330" text-anchor="middle" font-size="10.9" fill="#596579">parallel clean contexts → single-writer verified-fact merge → counterevidence → cited dossier</text>
+              <text x="480" y="350" text-anchor="middle" font-size="10.3" fill="#596579"><tspan font-weight="700">Routed extensions:</tspan> product cycle · M&amp;A · regulatory · geopolitics · weather/calendar · market-implied · variant/bull-bear</text>
+              <rect x="40" y="362" width="570" height="38" rx="7" fill="#fff" stroke="#dfaaa6" stroke-width="1.1"/>
+              <text x="325" y="385" text-anchor="middle" font-size="10.4" fill="#596579"><tspan font-weight="700">Code gates</tspan> · quote · metric/unit/basis · period/scale · coverage</text>
+              <rect x="622" y="362" width="298" height="38" rx="7" fill="#f4f7ff" stroke="#7791d5" stroke-width="1.1" stroke-dasharray="4 3"/>
+              <text x="771" y="378" text-anchor="middle" font-size="10.3" font-weight="700" fill="#3d55a5">LangSmith-instrumented chain</text>
+              <text x="771" y="392" text-anchor="middle" font-size="9.8" fill="#596579">chain/model calls + structured run log</text>
               <line x1="480" y1="410" x2="480" y2="429" stroke="#98a2b3" stroke-width="1.8" marker-end="url(#arch-arrow)"/>
               <rect x="230" y="433" width="500" height="50" rx="10" fill="#fff" stroke="#98a2b3" stroke-width="1.4"/>
               <text x="480" y="455" text-anchor="middle" font-size="13" font-weight="700" font-family="ui-monospace, Menlo, monospace">research/dossier.md</text>
@@ -224,7 +232,7 @@
               <rect x="500" y="520" width="440" height="320" rx="14" fill="#edf4ff" stroke="#2059c7" stroke-width="1.7"/>
               <text x="520" y="550" font-size="13" font-weight="800" letter-spacing="1.4" fill="#2059c7">2B · QUANTITATIVE ANALYSIS</text>
               <text x="920" y="550" text-anchor="end" font-size="11" fill="#596579" font-family="ui-monospace, Menlo, monospace">analysis/ + quant/</text>
-              <text x="520" y="572" font-size="11.8" fill="#596579">Modular · versioned · backtestable</text>
+              <text x="520" y="572" font-size="11.8" fill="#596579">Deterministic today · modular · hill-climbable</text>
               <rect x="520" y="590" width="400" height="44" rx="8" fill="#fff" stroke="#b7c8e7" stroke-width="1.1"/>
               <text x="720" y="617" text-anchor="middle" font-size="12.2" font-weight="700">Verified facts + public anchors</text>
               <line x1="720" y1="634" x2="720" y2="646" stroke="#98a2b3" stroke-width="1.5" marker-end="url(#arch-arrow)"/>
@@ -234,8 +242,9 @@
               <rect x="520" y="710" width="400" height="44" rx="8" fill="#fff" stroke="#b7c8e7" stroke-width="1.1"/>
               <text x="720" y="737" text-anchor="middle" font-size="12.2" font-weight="700">Comparable period time series</text>
               <line x1="720" y1="754" x2="720" y2="766" stroke="#98a2b3" stroke-width="1.5" marker-end="url(#arch-arrow)"/>
-              <rect x="520" y="770" width="400" height="44" rx="8" fill="#fff" stroke="#b7c8e7" stroke-width="1.1"/>
-              <text x="720" y="797" text-anchor="middle" font-size="12.2" font-weight="700">Forecast base + deterministic guardrail range</text>
+              <rect x="520" y="770" width="400" height="48" rx="8" fill="#fff" stroke="#b7c8e7" stroke-width="1.1"/>
+              <text x="720" y="791" text-anchor="middle" font-size="12.2" font-weight="700">Modular forecast engine + deterministic range</text>
+              <text x="720" y="807" text-anchor="middle" font-size="10.4" fill="#596579">roadmap: tuned methods → bespoke neural time-series transformer</text>
               <text x="720" y="830" text-anchor="middle" font-size="11.5" font-weight="700" fill="#2059c7">OUT · base estimate + bounded range</text>
               <!-- convergence and reconciliation -->
               <line x1="240" y1="840" x2="240" y2="870" stroke="#98a2b3" stroke-width="1.8" marker-end="url(#arch-arrow)"/>
@@ -274,11 +283,11 @@
                 <text x="240" y="1215" fill="#566fc9" font-size="15">→</text>
                 <rect x="255" y="1192" width="185" height="36" rx="7" fill="#fff" stroke="#bac5ed"/><text x="347.5" y="1214" fill="#2b3649">Walk-forward evaluation</text>
                 <text x="455" y="1215" fill="#566fc9" font-size="15">→</text>
-                <rect x="470" y="1192" width="185" height="36" rx="7" fill="#fff" stroke="#bac5ed"/><text x="562.5" y="1214" fill="#2b3649">Tune + ablate candidates</text>
+                <rect x="470" y="1192" width="185" height="36" rx="7" fill="#fff" stroke="#bac5ed"/><text x="562.5" y="1214" fill="#2b3649">Score candidate configs</text>
                 <text x="670" y="1215" fill="#566fc9" font-size="15">→</text>
                 <rect x="685" y="1192" width="235" height="36" rx="7" fill="#fff" stroke="#bac5ed"/><text x="802.5" y="1214" fill="#2b3649">Holdout gate → approved iteration ↺</text>
               </g>
-              <text x="480" y="1246" text-anchor="middle" font-size="10.8" fill="#596579">More labelled events enable stronger feature selection, estimator tuning, range calibration and routing—promoted only after held-out improvement.</text>
+              <text x="480" y="1246" text-anchor="middle" font-size="10.8" fill="#596579">The loss makes parameters hill-climbable; more observations unlock fine-tuning, gated by time-ordered holdouts.</text>
             </svg>
             <figcaption>Each reported result completes a labelled point-in-time event: its loss can train trainable modules and evaluate deterministic ones, while arithmetic and delivery remain code-owned.</figcaption>
           </figure>
@@ -294,8 +303,8 @@
         <div class="components">
           <article class="component">
             <span class="component-no">01</span>
-            <div class="component-copy"><h3>Grounded research</h3><p>Current code consolidates the ten-perspective design into four lenses plus counterevidence. Every lens uses the same evidence packet; coverage gaps can drive future specialist routing. Code rejects invalid metrics, periods, scales, quotes and near-miss line items.</p></div>
-            <div class="contract"><span class="label">Contract</span><p>Common evidence packet; coverage across history, guidance, operating bridge, external corroboration and expectations; no final value.</p><span class="path">pipeline/research/ · docs/personas.md</span></div>
+            <div class="component-copy"><h3>Observable, fact-grounded research</h3><p>Ten perspectives define the research surface; four clean-context synthesis agents summarize facts and history, guidance, the operating bridge, and demand plus peers. A single writer merges verified facts before counterevidence. LangSmith instruments chain and model-call spans; structured logs expose worker status, rejections and coverage.</p></div>
+            <div class="contract"><span class="label">Contract</span><p>Cited facts and claims with source, date, quote, metric, unit and basis; no forecast level.</p><span class="path">pipeline/research/ · docs/personas.md</span></div>
           </article>
           <article class="component">
             <span class="component-no">02</span>
@@ -304,7 +313,7 @@
           </article>
           <article class="component">
             <span class="component-no">03</span>
-            <div class="component-copy"><h3>Backtestable quantitative forecaster</h3><p>Deterministic methods operate only on comparable periods, then combine history and anchors into a base and range. Its stable contract lets us iterate on features, methods and parameters while scoring every version against the same held-out events.</p></div>
+            <div class="component-copy"><h3>Backtestable quantitative forecaster</h3><p>Today, simple deterministic methods turn comparable history and anchors into a base and range. The stable loss makes features and parameters hill-climbable, although candidate search is human-directed. With enough labelled events, the same contract can evaluate a bespoke neural forecaster or fine-tuned time-series transformer; promotion requires improvement on untouched, time-ordered holdouts.</p></div>
             <div class="contract"><span class="label">Contract</span><p><code>timeseries.json → ranges.json</code>, with method and evidence lineage.</p><span class="path">pipeline/quant/</span></div>
           </article>
           <article class="component">
@@ -319,7 +328,7 @@
           </article>
           <article class="component">
             <span class="component-no">06</span>
-            <div class="component-copy"><h3>Evaluation and MLOps loop</h3><p>Every forecast becomes a labelled point-in-time event after the actual is published. Today the harness scores error, benchmark performance, range coverage and event sensitivity. As data grows, we can fit trainable estimators and tune features, parameters and routing on past windows, promoting only versions that improve untouched holdouts.</p></div>
+            <div class="component-copy"><h3>Evaluation and MLOps loop</h3><p>Every forecast becomes a labelled point-in-time event after the actual is published. The current harness scores predefined configurations on error, benchmarks, range coverage and leave-one-event-out sensitivity. Search is human-directed today; more data can support automated tuning and model fine-tuning behind the same holdout gate.</p></div>
             <div class="contract"><span class="label">Contract</span><p>Forecast snapshot, cited actual, configuration, per-metric loss and sensitivity report.</p><span class="path">pipeline/quant/backtest.py · evaluation.py</span></div>
           </article>
         </div>
@@ -350,7 +359,7 @@ The model never emits the submitted level.</code></pre>
         </div>
         <div class="limitations">
           <article class="limitation"><h3>Research coverage can vary</h3><p>Fixed specialists improve replayability, but unusual issues may fall between roles and agentic extraction can vary. Coverage reports, retries and fallbacks contain that variance; they do not eliminate it.</p></article>
-          <article class="limitation"><h3>The labelled event set is still small</h3><p>Ranges are safety rails, not calibrated probabilities. Full-pipeline attribution, fitted estimators, experiment registry and automatic promotion require more point-in-time outcomes.</p></article>
+          <article class="limitation"><h3>The labelled event set is still small</h3><p>The neural time-series path is a roadmap, not a current claim. The dataset is too small to justify neural fitting, automated hill climbing or automatic promotion; today the deterministic baseline limits overfitting.</p></article>
           <article class="limitation"><h3>Fail-soft still needs admissible data</h3><p>Runtime gates contain many stage errors, but a total upstream outage cannot manufacture trustworthy values. Clear runs must treat any missing workbook as a delivery failure.</p></article>
           <article class="limitation"><h3>Corroboration is structural, not semantic</h3><p>Distinct source files are required, but the system does not yet prove that sources are truly independent or that every quote entails the proposed delta.</p></article>
         </div>
