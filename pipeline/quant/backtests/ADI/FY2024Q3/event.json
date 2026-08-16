@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "event_id": "ADI-FY2024Q3",
+  "company_id": "ADI",
+  "target_period": "FY2024Q3",
+  "as_of": "2024-08-20",
+  "actuals": [
+    {
+      "metric_id": "adi_revenue",
+      "value": 2312.0,
+      "unit": "USDm",
+      "basis": "as-reported",
+      "source": "challenge/offline-data/analog-devices/filings/2024-08-21__adi-us-20240821-q3-8k__102648.md",
+      "published_at": "2024-08-21",
+      "quote": "| Revenue         | $         | 2,312         | $ 3,076         | (25)%         |"
+    },
+    {
+      "metric_id": "adi_adj_eps",
+      "value": 1.58,
+      "unit": "USD / share",
+      "basis": "adjusted",
+      "source": "challenge/offline-data/analog-devices/filings/2024-08-21__adi-us-20240821-q3-8k__102648.md",
+      "published_at": "2024-08-21",
+      "quote": "| Adjusted diluted earnings per share | $         | 1.58         | $ 2.49         | (37)%         |"
+    },
+    {
+      "metric_id": "adi_adj_gm",
+      "value": 67.9,
+      "unit": "%",
+      "basis": "adjusted",
+      "source": "challenge/offline-data/analog-devices/filings/2024-08-21__adi-us-20240821-q3-8k__102648.md",
+      "published_at": "2024-08-21",
+      "quote": "| Adjusted gross margin percentage    |         | 67.9%         | 72.2%         | (430 bps)         |"
+    }
+  ]
+}

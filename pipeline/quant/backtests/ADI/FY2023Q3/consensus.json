@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "company_id": "ADI",
+  "retrieved_at": "2023-05-24T10:00:00-04:00",
+  "anchors": [
+    {
+      "metric_id": "adi_revenue",
+      "kind": "guidance_midpoint",
+      "value": 3100.0,
+      "unit": "USDm",
+      "basis": "as-reported",
+      "source": "challenge/offline-data/analog-devices/filings/2023-05-24__adi-us-20230524-q2-8k__102668.md",
+      "published_at": "2023-05-24",
+      "quote": "For the third quarter of fiscal 2023, we are forecasting revenue of $3.10 billion, +/- $100 million. At the midpoint of this revenue outlook, we expect reported operating margin of approximately 31.9%, +/-130 bps, and adjusted operating margin of approximately 48.5%, +/-70 bps. We are planning for reported EPS to be $1.64, +/-$0.12, and adjusted EPS to be $2.52, +/-$0.10.",
+      "note": "Historical management-guidance midpoint; $3.10 billion normalized to 3,100 USDm"
+    },
+    {
+      "metric_id": "adi_adj_eps",
+      "kind": "guidance_midpoint",
+      "value": 2.52,
+      "unit": "USD / share",
+      "basis": "adjusted",
+      "source": "challenge/offline-data/analog-devices/filings/2023-05-24__adi-us-20230524-q2-8k__102668.md",
+      "published_at": "2023-05-24",
+      "quote": "For the third quarter of fiscal 2023, we are forecasting revenue of $3.10 billion, +/- $100 million. At the midpoint of this revenue outlook, we expect reported operating margin of approximately 31.9%, +/-130 bps, and adjusted operating margin of approximately 48.5%, +/-70 bps. We are planning for reported EPS to be $1.64, +/-$0.12, and adjusted EPS to be $2.52, +/-$0.10.",
+      "note": "Historical management-guidance midpoint"
+    }
+  ]
+}

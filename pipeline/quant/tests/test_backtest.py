@@ -243,5 +243,43 @@ class CommittedHdSmokeTests(unittest.TestCase):
         )
 
 
+class CommittedAdiReplayTests(unittest.TestCase):
+    def test_three_point_in_time_events_cover_all_target_metrics(self) -> None:
+        case_root = REPO / "pipeline" / "quant" / "backtests" / "ADI"
+        cases = [
+            load_backtest_case(case_root / period, REPO)
+            for period in ("FY2023Q3", "FY2024Q3", "FY2025Q3")
+        ]
+        result = run_backtest(cases)
+        summaries = {summary.config_id: summary for summary in result.summaries}
+
+        self.assertEqual(
+            result.event_ids,
+            ("ADI-FY2023Q3", "ADI-FY2024Q3", "ADI-FY2025Q3"),
+        )
+        self.assertEqual(len(result.metrics), 54)
+        self.assertEqual(
+            {evaluation.metric_id for evaluation in result.metrics},
+            {"adi_revenue", "adi_adj_eps", "adi_adj_gm"},
+        )
+        self.assertEqual(
+            [usage.kind for usage in result.proxy_usage].count("guidance_midpoint"),
+            6,
+        )
+        self.assertEqual(
+            [usage.kind for usage in result.proxy_usage].count("b0_fallback"),
+            3,
+        )
+        self.assertAlmostEqual(summaries["b1_anchor"].mean_official_score, 1.0)
+        self.assertAlmostEqual(
+            summaries["current_ranges_base"].mean_official_score,
+            1.1122583435083429,
+        )
+        self.assertAlmostEqual(
+            summaries["current_ranges_base"].win_rate_vs_proxy,
+            5 / 9,
+        )
+
+
 if __name__ == "__main__":
     unittest.main()

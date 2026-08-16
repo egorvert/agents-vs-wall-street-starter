@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "company_id": "ADI",
+  "retrieved_at": "2025-05-22T10:00:00-04:00",
+  "anchors": [
+    {
+      "metric_id": "adi_revenue",
+      "kind": "guidance_midpoint",
+      "value": 2750.0,
+      "unit": "USDm",
+      "basis": "as-reported",
+      "source": "challenge/offline-data/analog-devices/filings/2025-05-22__adi-us-20250522-q2-8k__102679.md",
+      "published_at": "2025-05-22",
+      "quote": "For the third quarter of fiscal 2025, we are forecasting revenue of $2.75 billion, +/- $100 million. At the midpoint of this revenue outlook, we expect reported operating margin of approximately 27.2%, +/-150 bps, and adjusted operating margin of approximately 41.5%, +/-100 bps. We are planning for reported EPS to be $1.23, +/-$0.10, and adjusted EPS to be $1.92, +/-$0.10.",
+      "note": "Historical management-guidance midpoint; $2.75 billion normalized to 2,750 USDm"
+    },
+    {
+      "metric_id": "adi_adj_eps",
+      "kind": "guidance_midpoint",
+      "value": 1.92,
+      "unit": "USD / share",
+      "basis": "adjusted",
+      "source": "challenge/offline-data/analog-devices/filings/2025-05-22__adi-us-20250522-q2-8k__102679.md",
+      "published_at": "2025-05-22",
+      "quote": "For the third quarter of fiscal 2025, we are forecasting revenue of $2.75 billion, +/- $100 million. At the midpoint of this revenue outlook, we expect reported operating margin of approximately 27.2%, +/-150 bps, and adjusted operating margin of approximately 41.5%, +/-100 bps. We are planning for reported EPS to be $1.23, +/-$0.10, and adjusted EPS to be $1.92, +/-$0.10.",
+      "note": "Historical management-guidance midpoint"
+    }
+  ]
+}

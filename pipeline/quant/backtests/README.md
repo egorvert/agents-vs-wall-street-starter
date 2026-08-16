@@ -11,6 +11,11 @@ directory contains:
 `backtest.py` verifies every quote against the local corpus and refuses target-period or
 post-cutoff forecast inputs before calculating a forecast.
 
+These are historical replays, not new-result forecasts. Pre-cutoff filings become the
+inputs and the subsequently published filing is held out as the answer. This exercises
+the same units, bases, fiscal periods, citations, and leakage gates that new handoffs use
+when the challenge results become available.
+
 ## HD smoke set
 
 The first smoke set holds out FY2023Q2, FY2024Q2 and FY2025Q2. It scores net sales and
@@ -53,3 +58,25 @@ the current model and 75%-B1 blend win selected cases but do not beat it overall
 This is a leak-free plumbing and direction check, not evidence of statistical
 significance. Six heterogeneous observations cannot justify regression. Expand companies,
 metrics and historical point-in-time anchors before fitting any coefficients.
+
+## ADI replay set
+
+The ADI set holds out FY2023Q3, FY2024Q3, and FY2025Q3 across revenue, adjusted
+diluted EPS, and adjusted gross margin: nine observations in total. Historical Q3
+management guidance supplies six revenue/EPS B1 proxies. The supplied corpus has no
+matching adjusted-gross-margin anchor, so those three rows explicitly use `b0_fallback`.
+
+Run the ADI replay without committing its generated result:
+
+```powershell
+python pipeline/quant/backtest.py `
+  --case pipeline/quant/backtests/ADI/FY2023Q3 `
+  --case pipeline/quant/backtests/ADI/FY2024Q3 `
+  --case pipeline/quant/backtests/ADI/FY2025Q3 `
+  --output "$env:TEMP/adi-replay-results.json"
+```
+
+At implementation time B1 scored `1.000` and the current ranges base scored `1.112`.
+The current base nevertheless won five of nine paired comparisons, showing why both the
+mean official score and paired outcomes remain visible. B0 scored `3.667`; this cyclical
+sample strongly favors the available guidance anchors over extrapolating the last YoY move.

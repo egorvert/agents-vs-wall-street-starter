@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "company_id": "ADI",
+  "series": [
+    {
+      "metric_id": "adi_revenue",
+      "unit": "USDm",
+      "basis": "as-reported",
+      "period_type": "Q",
+      "points": [
+        {
+          "period": "FY2021Q3",
+          "value": 1759.0,
+          "source": "challenge/offline-data/analog-devices/filings/2022-08-17__adi-us-20220817-q3-8k__102658.md",
+          "published_at": "2022-08-17",
+          "quote": "| Revenue         | $ 3,110         |    | $ 1,759         |    | 77        | %  |"
+        },
+        {
+          "period": "FY2022Q3",
+          "value": 3110.0,
+          "source": "challenge/offline-data/analog-devices/filings/2022-08-17__adi-us-20220817-q3-8k__102658.md",
+          "published_at": "2022-08-17",
+          "quote": "| Revenue         | $ 3,110         |    | $ 1,759         |    | 77        | %  |"
+        },
+        {
+          "period": "FY2023Q3",
+          "value": 3076.0,
+          "source": "challenge/offline-data/analog-devices/filings/2023-08-23__adi-us-20230823-q3-8k-2__488074.md",
+          "published_at": "2023-08-23",
+          "quote": "| Revenue         | $         | 3,076         | $ 3,110         | (1)%         |"
+        }
+      ]
+    },
+    {
+      "metric_id": "adi_adj_eps",
+      "unit": "USD / share",
+      "basis": "adjusted",
+      "period_type": "Q",
+      "points": [
+        {
+          "period": "FY2021Q3",
+          "value": 1.72,
+          "source": "challenge/offline-data/analog-devices/filings/2022-08-17__adi-us-20220817-q3-8k__102658.md",
+          "published_at": "2022-08-17",
+          "quote": "| Adjusted diluted earnings per share | $ 2.52    |    | $ 1.72    | 47      | %   |"
+        },
+        {
+          "period": "FY2022Q3",
+          "value": 2.52,
+          "source": "challenge/offline-data/analog-devices/filings/2022-08-17__adi-us-20220817-q3-8k__102658.md",
+          "published_at": "2022-08-17",
+          "quote": "| Adjusted diluted earnings per share | $ 2.52    |    | $ 1.72    | 47      | %   |"
+        },
+        {
+          "period": "FY2023Q3",
+          "value": 2.49,
+          "source": "challenge/offline-data/analog-devices/filings/2023-08-23__adi-us-20230823-q3-8k-2__488074.md",
+          "published_at": "2023-08-23",
+          "quote": "| Adjusted diluted earnings per share | $         | 2.49         | $ 2.52         | (1)%         |"
+        }
+      ]
+    },
+    {
+      "metric_id": "adi_adj_gm",
+      "unit": "%",
+      "basis": "adjusted",
+      "period_type": "Q",
+      "points": [
+        {
+          "period": "FY2021Q3",
+          "value": 71.6,
+          "source": "challenge/offline-data/analog-devices/filings/2022-08-17__adi-us-20220817-q3-8k__102658.md",
+          "published_at": "2022-08-17",
+          "quote": "| Adjusted gross margin percentage    | 74.1      | %  | 71.6      | 250 bps |     |"
+        },
+        {
+          "period": "FY2022Q3",
+          "value": 74.1,
+          "source": "challenge/offline-data/analog-devices/filings/2022-08-17__adi-us-20220817-q3-8k__102658.md",
+          "published_at": "2022-08-17",
+          "quote": "| Adjusted gross margin percentage    | 74.1      | %  | 71.6      | 250 bps |     |"
+        },
+        {
+          "period": "FY2023Q3",
+          "value": 72.2,
+          "source": "challenge/offline-data/analog-devices/filings/2023-08-23__adi-us-20230823-q3-8k-2__488074.md",
+          "published_at": "2023-08-23",
+          "quote": "| Adjusted gross margin percentage    |         | 72.2 %         | 74.1 %         | (190 bps)         |"
+        }
+      ]
+    }
+  ]
+}

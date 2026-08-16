@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "company_id": "ADI",
+  "retrieved_at": "2024-05-22T10:00:00-04:00",
+  "anchors": [
+    {
+      "metric_id": "adi_revenue",
+      "kind": "guidance_midpoint",
+      "value": 2270.0,
+      "unit": "USDm",
+      "basis": "as-reported",
+      "source": "challenge/offline-data/analog-devices/filings/2024-05-22__adi-us-20240522-q2-8k__102675.md",
+      "published_at": "2024-05-22",
+      "quote": "For the third quarter of fiscal 2024, we are forecasting revenue of $2.27 billion, +/- $100 million. At the midpoint of this revenue outlook, we expect reported operating margin of approximately 20.1%, +/-200 bps, and adjusted operating margin of approximately 40.0%, +/-100 bps. We are planning for reported EPS to be $0.71, +/-$0.10, and adjusted EPS to be $1.50, +/-$0.10.",
+      "note": "Historical management-guidance midpoint; $2.27 billion normalized to 2,270 USDm"
+    },
+    {
+      "metric_id": "adi_adj_eps",
+      "kind": "guidance_midpoint",
+      "value": 1.5,
+      "unit": "USD / share",
+      "basis": "adjusted",
+      "source": "challenge/offline-data/analog-devices/filings/2024-05-22__adi-us-20240522-q2-8k__102675.md",
+      "published_at": "2024-05-22",
+      "quote": "For the third quarter of fiscal 2024, we are forecasting revenue of $2.27 billion, +/- $100 million. At the midpoint of this revenue outlook, we expect reported operating margin of approximately 20.1%, +/-200 bps, and adjusted operating margin of approximately 40.0%, +/-100 bps. We are planning for reported EPS to be $0.71, +/-$0.10, and adjusted EPS to be $1.50, +/-$0.10.",
+      "note": "Historical management-guidance midpoint"
+    }
+  ]
+}
