@@ -8,3 +8,6 @@ __pycache__/
 !.env.example
 entry.json
 submission/*.xlsx
+
+# PyCharm Maddness
+.idea/

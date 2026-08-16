@@ -1,0 +1,22 @@
+{
+  "archive": "Agents vs Wall Street live external evidence",
+  "snapshotCutoffAt": "2026-08-16T10:55:00+01:00",
+  "retrievedAt": "2026-08-16T10:55:00+01:00",
+  "timezone": "Europe/London",
+  "documentCount": 19,
+  "companies": ["HD", "ADI", "LSE:HAS", "DE"],
+  "sourcePriority": [
+    "company-guidance",
+    "regulatory-or-company-hosted-data",
+    "official-government-data",
+    "industry-data",
+    "reputable-news"
+  ],
+  "policy": {
+    "allowEvidencePublishedAfterCutoff": false,
+    "overwriteExistingSnapshotNotes": false,
+    "requireSourceUrl": true,
+    "treatNotesAsForecasts": false
+  }
+}
+
