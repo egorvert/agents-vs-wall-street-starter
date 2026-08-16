@@ -84,7 +84,7 @@ def _normalise_text(text: str) -> str:
     return re.sub(r"\s+", " ", text.replace("*", "")).strip()
 
 
-def _period_type(period: str, where: str) -> str:
+def canonical_period_type(period: str, where: str = "period") -> str:
     match = PERIOD_RE.fullmatch(period)
     if not match:
         raise ExtractionError(
@@ -218,7 +218,7 @@ def _validate_fact(
         )
     if not isinstance(raw["period"], str):
         raise ExtractionError(f"{where}: period must be a canonical string")
-    period_type = _period_type(raw["period"], where)
+    period_type = canonical_period_type(raw["period"], where)
     _parse_date(raw["published_at"], where)
     _validate_citation(repo_root, raw, where, source_cache)
 
@@ -307,7 +307,7 @@ def build_timeseries(
     company = _load_company(repo_root, company_id)
     metrics = {metric["metric_id"]: metric for metric in company["metrics"]}
     cutoff = _parse_date(as_of, "extractor cutoff")
-    target_period_type = _period_type(target_period, "extractor target")
+    target_period_type = canonical_period_type(target_period, "extractor target")
     expected_period_type = company.get("period_type")
     if expected_period_type and target_period_type != expected_period_type:
         raise ExtractionError(
