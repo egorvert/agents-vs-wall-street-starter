@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "company_id": "HD",
+  "ranges": [
+    {
+      "metric_id": "hd_net_sales",
+      "unit": "USDm",
+      "basis": "as-reported",
+      "low": 46400.0,
+      "base": 46900.0,
+      "high": 47350.0,
+      "methods": ["guidance_band_applied_to_prior_q2", "yoy_trend"],
+      "evidence": [
+        { "source": "challenge/live-data/home-depot/company-releases/2026-05-19__hd-q1-results-fy2026-guidance.md", "published_at": "2026-05-19", "quote": "total sales growth of approximately 2.5% to 4.5%" },
+        { "source": "challenge/offline-data/home-depot/filings/2025-08-19__hd-us-20250819-q2-8k__143666.md", "published_at": "2025-08-19", "quote": "reported sales of $45.3 billion for the second quarter of fiscal 2025" }
+      ],
+      "notes": "FIXTURE sample: FY guidance growth band applied to FY2025Q2 base of 45,277"
+    },
+    {
+      "metric_id": "hd_adj_eps",
+      "unit": "USD / share",
+      "basis": "adjusted",
+      "low": 4.62,
+      "base": 4.75,
+      "high": 4.88,
+      "methods": ["guidance_band_applied_to_prior_q2", "seasonal_naive_band"],
+      "evidence": [
+        { "source": "challenge/live-data/home-depot/company-releases/2026-05-19__hd-q1-results-fy2026-guidance.md", "published_at": "2026-05-19", "quote": "adjusted diluted EPS growth of approximately flat to 4.0% from fiscal 2025's $14.69" },
+        { "source": "challenge/offline-data/home-depot/filings/2025-08-19__hd-us-20250819-q2-8k__143666.md", "published_at": "2025-08-19", "quote": "Adjusted diluted earnings per share for the second quarter of fiscal 2025 were $4.68" }
+      ],
+      "notes": "FIXTURE sample: flat-to-+4% band around FY2025Q2 4.68 with a small upper-half tilt"
+    },
+    {
+      "metric_id": "hd_comp_sales",
+      "unit": "%",
+      "basis": "as-reported",
+      "low": 0.0,
+      "base": 1.0,
+      "high": 2.0,
+      "methods": ["guidance_band"],
+      "evidence": [
+        { "source": "challenge/live-data/home-depot/company-releases/2026-05-19__hd-q1-results-fy2026-guidance.md", "published_at": "2026-05-19", "quote": "comparable sales growth of approximately flat to 2.0%" }
+      ],
+      "notes": "FIXTURE sample: guided FY band used directly"
+    }
+  ]
+}

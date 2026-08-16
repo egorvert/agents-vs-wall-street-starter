@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "company_id": "HD",
+  "series": [
+    {
+      "metric_id": "hd_net_sales",
+      "unit": "USDm",
+      "basis": "as-reported",
+      "period_type": "Q",
+      "points": [
+        { "period": "FY2024Q2", "value": 43175.0, "source": "challenge/offline-data/home-depot/filings/2024-08-13__hd-us-20240813-q2-8k__101849.md", "published_at": "2024-08-13", "quote": "reported sales of $43.2 billion for the second quarter of fiscal 2024" },
+        { "period": "FY2025Q2", "value": 45277.0, "source": "challenge/offline-data/home-depot/filings/2025-08-19__hd-us-20250819-q2-8k__143666.md", "published_at": "2025-08-19", "quote": "reported sales of $45.3 billion for the second quarter of fiscal 2025" },
+        { "period": "FY2026Q1", "value": 41800.0, "source": "challenge/live-data/home-depot/company-releases/2026-05-19__hd-q1-results-fy2026-guidance.md", "published_at": "2026-05-19", "quote": "Home Depot reported first-quarter fiscal 2026 sales of $41.8 billion, up 4.8% year over year" }
+      ]
+    },
+    {
+      "metric_id": "hd_adj_eps",
+      "unit": "USD / share",
+      "basis": "adjusted",
+      "period_type": "Q",
+      "points": [
+        { "period": "FY2024Q2", "value": 4.67, "source": "challenge/offline-data/home-depot/filings/2024-08-13__hd-us-20240813-q2-8k__101849.md", "published_at": "2024-08-13", "quote": "Adjusted diluted earnings per share for the second quarter of fiscal 2024 were $4.67" },
+        { "period": "FY2025Q2", "value": 4.68, "source": "challenge/offline-data/home-depot/filings/2025-08-19__hd-us-20250819-q2-8k__143666.md", "published_at": "2025-08-19", "quote": "Adjusted diluted earnings per share for the second quarter of fiscal 2025 were $4.68" },
+        { "period": "FY2026Q1", "value": 3.43, "source": "challenge/live-data/home-depot/company-releases/2026-05-19__hd-q1-results-fy2026-guidance.md", "published_at": "2026-05-19", "quote": "Adjusted diluted EPS was $3.43, versus $3.56 a year earlier" }
+      ]
+    },
+    {
+      "metric_id": "hd_comp_sales",
+      "unit": "%",
+      "basis": "as-reported",
+      "period_type": "Q",
+      "points": [
+        { "period": "FY2024Q2", "value": -3.3, "source": "challenge/offline-data/home-depot/filings/2024-08-13__hd-us-20240813-q2-8k__101849.md", "published_at": "2024-08-13", "quote": "Comparable sales for the second quarter of fiscal 2024 decreased 3.3%" },
+        { "period": "FY2025Q2", "value": 1.0, "source": "challenge/offline-data/home-depot/filings/2025-08-19__hd-us-20250819-q2-8k__143666.md", "published_at": "2025-08-19", "quote": "Comparable sales for the second quarter of fiscal 2025 increased 1.0%" },
+        { "period": "FY2026Q1", "value": 0.6, "source": "challenge/live-data/home-depot/company-releases/2026-05-19__hd-q1-results-fy2026-guidance.md", "published_at": "2026-05-19", "quote": "Total-company comparable sales increased 0.6%" }
+      ]
+    }
+  ]
+}

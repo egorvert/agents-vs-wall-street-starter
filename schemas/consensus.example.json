@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "company_id": "HD",
+  "retrieved_at": "2026-08-16T13:05:00+01:00",
+  "anchors": [
+    {
+      "metric_id": "hd_adj_eps",
+      "kind": "consensus",
+      "value": 4.71,
+      "unit": "USD / share",
+      "basis": "adjusted",
+      "source": "challenge/live-data/home-depot/company-releases/example.md",
+      "published_at": "2026-08-15",
+      "quote": "verbatim sentence containing the number",
+      "note": "vendor basis checked"
+    }
+  ]
+}

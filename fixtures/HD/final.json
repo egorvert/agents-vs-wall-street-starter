@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "company_id": "HD",
+  "finals": [
+    {
+      "metric_id": "hd_net_sales",
+      "value": 46900.0,
+      "unit": "USDm",
+      "basis": "as-reported",
+      "anchor": 46900.0,
+      "anchor_kind": "range_base",
+      "delta": 0.0,
+      "delta_evidence": [],
+      "fallback_tier": 0,
+      "rationale": "FIXTURE: no deviation from range base; no consensus anchor available"
+    },
+    {
+      "metric_id": "hd_adj_eps",
+      "value": 4.75,
+      "unit": "USD / share",
+      "basis": "adjusted",
+      "anchor": 4.75,
+      "anchor_kind": "range_base",
+      "delta": 0.0,
+      "delta_evidence": [],
+      "fallback_tier": 0,
+      "rationale": "FIXTURE: range base, guidance upper-half tilt already inside the range"
+    },
+    {
+      "metric_id": "hd_comp_sales",
+      "value": 1.0,
+      "unit": "%",
+      "basis": "as-reported",
+      "anchor": 1.0,
+      "anchor_kind": "guidance_midpoint",
+      "delta": 0.0,
+      "delta_evidence": [],
+      "fallback_tier": 0,
+      "rationale": "FIXTURE: guidance midpoint, Q1 ran at 0.6"
+    }
+  ]
+}

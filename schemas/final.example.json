@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "company_id": "HD",
+  "finals": [
+    {
+      "metric_id": "hd_adj_eps",
+      "value": 4.72,
+      "unit": "USD / share",
+      "basis": "adjusted",
+      "anchor": 4.68,
+      "anchor_kind": "range_base",
+      "delta": 0.04,
+      "delta_evidence": [
+        {
+          "source": "out/HD/analysis/news.md",
+          "published_at": "2026-08-14",
+          "quote": "verbatim sentence supporting the delta"
+        }
+      ],
+      "fallback_tier": 0,
+      "rationale": "one sentence"
+    }
+  ]
+}

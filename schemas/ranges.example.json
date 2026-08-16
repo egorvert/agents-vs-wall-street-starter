@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "company_id": "HD",
+  "ranges": [
+    {
+      "metric_id": "hd_adj_eps",
+      "unit": "USD / share",
+      "basis": "adjusted",
+      "low": 4.42,
+      "base": 4.68,
+      "high": 4.86,
+      "methods": ["seasonal_naive_band", "yoy_trend", "guidance_upper_bias", "consensus_anchor"],
+      "evidence": [
+        {
+          "source": "challenge/offline-data/home-depot/filings/example.md",
+          "published_at": "2026-05-20",
+          "quote": "verbatim sentence containing the guidance range"
+        }
+      ],
+      "notes": "actuals land upper-half of guidance historically"
+    }
+  ]
+}

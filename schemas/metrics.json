@@ -1,0 +1,54 @@
+{
+  "comment": "Single source of truth for metric identity. Derived from challenge/companies.json — labels and units are verbatim. Never hand-edit a unit string.",
+  "schema_version": 1,
+  "companies": {
+    "HD": {
+      "company": "Home Depot",
+      "ticker": "HD",
+      "period": "FY2026Q2",
+      "period_type": "Q",
+      "output_file": "HD-FY2026Q2.xlsx",
+      "metrics": [
+        { "metric_id": "hd_net_sales", "label": "Net sales", "unit": "USDm", "basis": "as-reported" },
+        { "metric_id": "hd_adj_eps", "label": "Adjusted diluted EPS", "unit": "USD / share", "basis": "adjusted" },
+        { "metric_id": "hd_comp_sales", "label": "Comparable sales, total company", "unit": "%", "basis": "as-reported" }
+      ]
+    },
+    "ADI": {
+      "company": "Analog Devices",
+      "ticker": "ADI",
+      "period": "FY2026Q3",
+      "period_type": "Q",
+      "output_file": "ADI-FY2026Q3.xlsx",
+      "metrics": [
+        { "metric_id": "adi_revenue", "label": "Revenue", "unit": "USDm", "basis": "as-reported" },
+        { "metric_id": "adi_adj_eps", "label": "Adjusted diluted EPS", "unit": "USD / share", "basis": "adjusted" },
+        { "metric_id": "adi_adj_gm", "label": "Adjusted gross margin", "unit": "%", "basis": "adjusted" }
+      ]
+    },
+    "HAS": {
+      "company": "Hays plc",
+      "ticker": "LSE:HAS",
+      "period": "FY2026",
+      "period_type": "FY",
+      "output_file": "HAS-FY2026.xlsx",
+      "metrics": [
+        { "metric_id": "has_net_fees", "label": "Net fees", "unit": "GBPm", "basis": "as-reported" },
+        { "metric_id": "has_preexc_eps", "label": "Pre-exceptional basic EPS", "unit": "GBp", "basis": "pre-exceptional" },
+        { "metric_id": "has_preexc_op", "label": "Pre-exceptional operating profit", "unit": "GBPm", "basis": "pre-exceptional" }
+      ]
+    },
+    "DE": {
+      "company": "Deere & Company",
+      "ticker": "DE",
+      "period": "FY2026Q3",
+      "period_type": "Q",
+      "output_file": "DE-FY2026Q3.xlsx",
+      "metrics": [
+        { "metric_id": "de_net_sales", "label": "Worldwide net sales and revenues", "unit": "USDm", "basis": "as-reported" },
+        { "metric_id": "de_eps_gaap", "label": "Diluted EPS (GAAP)", "unit": "USD / share", "basis": "GAAP" },
+        { "metric_id": "de_ppa_op", "label": "Production & Precision Ag operating profit", "unit": "USDm", "basis": "as-reported" }
+      ]
+    }
+  }
+}

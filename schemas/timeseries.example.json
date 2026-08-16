@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "company_id": "HD",
+  "series": [
+    {
+      "metric_id": "hd_net_sales",
+      "unit": "USDm",
+      "basis": "as-reported",
+      "period_type": "Q",
+      "points": [
+        {
+          "period": "FY2025Q2",
+          "value": 45277.0,
+          "source": "challenge/offline-data/home-depot/filings/example.md",
+          "published_at": "2025-08-19",
+          "quote": "verbatim sentence containing the number"
+        }
+      ]
+    }
+  ]
+}
