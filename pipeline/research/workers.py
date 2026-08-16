@@ -180,6 +180,113 @@ async def _run_worker(*, worker: str, prompt_file: str, model: str, cid: str,
     return clean
 
 
+def challenge_schema() -> dict:
+    challenge = {
+        "type": "object", "additionalProperties": False,
+        "required": ["target_claim", "rebuttal", "severity", "eid", "quote"],
+        "properties": {
+            "target_claim": {"type": "string"},
+            "rebuttal": {"type": "string"},
+            "severity": {"type": "string", "enum": ["low", "medium", "high"]},
+            "eid": {"type": "string"},
+            "quote": {"type": "string"},
+        },
+    }
+    return {
+        "type": "object", "additionalProperties": False,
+        "required": ["challenges"],
+        "properties": {"challenges": {"type": "array", "items": challenge}},
+    }
+
+
+def _query_pack_ce(cid: str, info: dict) -> list[str]:
+    queries = [f"{m['label']} decline lower" for m in info["metrics"]]
+    queries += ["risk uncertainty headwind", "weaker demand softening",
+                "restructuring exceptional charge", "currency foreign exchange impact"]
+    return config.QUERY_HINTS.get(cid, {}).get("w4", []) + queries
+
+
+@traceable(run_type="chain", name="pass:counterevidence")
+async def counterevidence_pass(cid: str, info: dict, run_id: str,
+                               claims: list[dict], guidance_facts: list[dict]) -> dict:
+    """Clean-context skeptic over anonymised claims; challenges must cite evidence."""
+    system, version = _prompt("counterevidence.md")
+    evidence = search_evidence(cid, _query_pack_ce(cid, info))
+    ev_by_eid = {e.eid: e for e in evidence}
+    claim_lines = [
+        f"- [{'/'.join(c['metric_ids']) or 'general'}; direction {c['direction']}] {c['claim']}"
+        for c in claims
+    ] + [
+        f"- [guidance; {f['metric_id']} {f['period']}] management guided {f['value']} — \"{f['quote']}\""
+        for f in guidance_facts
+    ]
+    user = (
+        _metric_context(cid, info)
+        + "\n\nCLAIMS UNDER REVIEW:\n" + "\n".join(claim_lines)
+        + "\n\nEVIDENCE BLOCKS:\n\n" + render_evidence(evidence)
+    )
+
+    def validate(parsed: dict) -> list[str]:
+        problems = []
+        for ch in parsed.get("challenges", []):
+            problems += verify.check_claim({"claim": ch.get("rebuttal", ""),
+                                            "eid": ch.get("eid"), "quote": ch.get("quote")},
+                                           ev_by_eid)
+        return problems
+
+    parsed = await llm.call_structured(
+        model=config.WORKER_MODEL, system=system, user=user,
+        schema_name="challenges", schema=challenge_schema(), prompt_version=version,
+        metadata={"run_id": run_id, "company_id": cid, "worker": "counterevidence",
+                  "stage": "research", "prompt_version": version, "model": config.WORKER_MODEL},
+        validate=validate,
+    )
+    rejects, kept = [], []
+    for ch in parsed.get("challenges", []):
+        problems = verify.check_claim({"claim": ch.get("rebuttal", ""), "eid": ch.get("eid"),
+                                       "quote": ch.get("quote")}, ev_by_eid)
+        (rejects.extend(problems) if problems else kept.append(ch))
+    return {"challenges": kept, "_rejects": rejects,
+            "_evidence": {e.eid: {"source": e.source, "published_at": e.published_at}
+                          for e in evidence}}
+
+
+PROSE_SECTIONS = ["basis_overview", "historical_overview", "guidance_overview",
+                  "driver_overview", "risk_overview"]
+
+
+@traceable(run_type="chain", name="pass:prose")
+async def prose_pass(cid: str, run_id: str, dossier_text: str) -> dict:
+    """Terra overview paragraphs; deterministic no-new-numbers check drops
+    offending sentences (never repaired by a model)."""
+    system, version = _prompt("prose.md")
+    schema = {
+        "type": "object", "additionalProperties": False,
+        "required": PROSE_SECTIONS,
+        "properties": {k: {"type": "string"} for k in PROSE_SECTIONS},
+    }
+    parsed = await llm.call_structured(
+        model=config.MERGE_MODEL, system=system, user=dossier_text,
+        schema_name="dossier_prose", schema=schema, prompt_version=version,
+        metadata={"run_id": run_id, "company_id": cid, "worker": "prose",
+                  "stage": "research", "prompt_version": version, "model": config.MERGE_MODEL},
+    )
+    allowed = set(re.findall(r"\d[\d,]*\.?\d*", dossier_text))
+    dropped = []
+    for k in PROSE_SECTIONS:
+        kept_sentences = []
+        for sent in re.split(r"(?<=[.!?])\s+", parsed.get(k, "")):
+            nums = set(re.findall(r"\d[\d,]*\.?\d*", sent))
+            if nums - allowed:
+                dropped.append({"section": k, "sentence": sent,
+                                "new_numbers": sorted(nums - allowed)})
+            else:
+                kept_sentences.append(sent)
+        parsed[k] = " ".join(kept_sentences).strip()
+    parsed["_dropped"] = dropped
+    return parsed
+
+
 @traceable(run_type="chain", name="worker:w1_custodian")
 async def w1_custodian(cid: str, info: dict, run_id: str) -> dict:
     return await _run_worker(
@@ -195,4 +302,34 @@ async def w2_guidance(cid: str, info: dict, run_id: str) -> dict:
         worker="w2_guidance", prompt_file="w2_guidance.md",
         model=config.CUSTODIAN_MODEL, cid=cid, info=info,
         queries=_query_pack_w2(cid, info), run_id=run_id,
+    )
+
+
+def _query_pack_w3(cid: str, info: dict) -> list[str]:
+    queries = [f"{m['label']} segment" for m in info["metrics"]]
+    queries += ["segment operating margin mix", "volume price mix", "diluted shares tax rate"]
+    return config.QUERY_HINTS.get(cid, {}).get("w3", []) + queries
+
+
+def _query_pack_w4(cid: str, info: dict) -> list[str]:
+    queries = ["market data industry demand", "competitor results peer"]
+    queries += [f"{m['label']} industry" for m in info["metrics"]]
+    return config.QUERY_HINTS.get(cid, {}).get("w4", []) + queries
+
+
+@traceable(run_type="chain", name="worker:w3_operating_model")
+async def w3_operating_model(cid: str, info: dict, run_id: str) -> dict:
+    return await _run_worker(
+        worker="w3_operating_model", prompt_file="w3_operating_model.md",
+        model=config.WORKER_MODEL, cid=cid, info=info,
+        queries=_query_pack_w3(cid, info), run_id=run_id,
+    )
+
+
+@traceable(run_type="chain", name="worker:w4_demand_peers")
+async def w4_demand_peers(cid: str, info: dict, run_id: str) -> dict:
+    return await _run_worker(
+        worker="w4_demand_peers", prompt_file="w4_demand_peers.md",
+        model=config.WORKER_MODEL, cid=cid, info=info,
+        queries=_query_pack_w4(cid, info), run_id=run_id,
     )

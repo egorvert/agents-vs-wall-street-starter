@@ -78,7 +78,9 @@ def _value_in_quote(value: float, quote: str) -> bool:
     v = abs(float(value))
     candidates = {
         f"{v:,.0f}", f"{v:.0f}", f"{v:g}", f"{v:.1f}", f"{v:.2f}",
+        f"{v:,.1f}", f"{v:,.2f}",   # 1,113.6 — UK GBPm style
         f"{v / 1000:.1f}",  # 45277 quoted as "$45.3 billion"
+        f"{v / 1000:.2f}",  # 2880 quoted as "$2.88 billion"
     }
     return any(c in quote for c in candidates)
 

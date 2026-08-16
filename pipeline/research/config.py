@@ -60,17 +60,29 @@ QUERY_HINTS: dict[str, dict[str, list[str]]] = {
                "pre-exceptional operating profit full year"],
         "w2": ["like-for-like net fees FY26", "trading statement fourth quarter net fees",
                "consensus range operating profit"],
+        "w3": ["consultant headcount productivity", "temp contracting perm fee mix",
+               "cost savings structural"],
+        "w4": ["permanent hiring market UK Germany Australia", "job vacancies recruitment market",
+               "labour market conditions"],
     },
     "DE": {
         # no w1 hints: tested 13:55 run — they displaced good evidence blocks
         # with PDF-mangled tables and w1 output collapsed from 40 facts to 3
         "w2": ["net income forecast full year outlook", "fiscal 2026 outlook"],
+        "w3": ["production precision agriculture segment shipment volumes price",
+               "dealer inventory used equipment"],
+        "w4": ["farm income commodity prices crop", "agriculture equipment industry demand",
+               "large ag tractor combine retail sales"],
     },
     "ADI": {
         "w2": ["outlook revenue midpoint plus or minus", "guidance adjusted gross margin"],
+        "w3": ["gross margin utilization factory inventory", "end market industrial automotive mix"],
+        "w4": ["semiconductor cycle bookings orders inventory", "industrial automotive demand recovery"],
     },
     "HD": {
         "w2": ["fiscal 2026 guidance comparable sales growth", "guidance total sales growth"],
+        "w3": ["comparable transactions average ticket", "pro contractor sales SRS GMS"],
+        "w4": ["housing market home improvement demand", "building materials retail sales"],
     },
 }
 

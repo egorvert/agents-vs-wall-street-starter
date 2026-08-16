@@ -23,7 +23,8 @@ from langsmith import traceable
 from . import config, verify
 from .dossier import render_dossier
 from .retrieval import Evidence
-from .workers import w1_custodian, w2_guidance
+from .workers import (counterevidence_pass, prose_pass, w1_custodian,
+                      w2_guidance, w3_operating_model, w4_demand_peers)
 
 
 def _now() -> str:
@@ -64,7 +65,8 @@ def _merge(packets: list[dict]) -> dict:
         for f in p["facts"]:
             facts.append({**f, "eid": remap[f["eid"]]})
         for c in p["claims"]:
-            claims.append({**c, "eid": remap[c["eid"]]})
+            # _lens kept for coverage/logs; stripped before any LLM sees claims
+            claims.append({**c, "eid": remap[c["eid"]], "_lens": p["_worker"]})
         for n in p["basis_notes"]:
             notes.append({**n, "eid": remap[n["eid"]]})
         suggested += p["suggested_indicators"]
@@ -93,6 +95,8 @@ async def research_company(cid: str, run_id: str, log: RunLog) -> bool:
     packets = await asyncio.gather(
         guarded("w1_custodian", w1_custodian(cid, info, run_id)),
         guarded("w2_guidance", w2_guidance(cid, info, run_id)),
+        guarded("w3_operating_model", w3_operating_model(cid, info, run_id)),
+        guarded("w4_demand_peers", w4_demand_peers(cid, info, run_id)),
     )
     packets = [p for p in packets if p]
     if not packets:
@@ -106,22 +110,55 @@ async def research_company(cid: str, run_id: str, log: RunLog) -> bool:
                   facts=len(p["facts"]), claims=len(p["claims"]))
 
     merged = _merge(packets)
+
+    # counterevidence: clean-context skeptic over anonymised claims + guidance
+    anon_claims = [{k: v for k, v in c.items() if not k.startswith("_")}
+                   for c in merged["claims"]]
+    guidance_facts = [f for f in merged["facts"] if f.get("is_guidance")]
+    challenges: list[dict] = []
+    ce = await guarded("counterevidence", counterevidence_pass(
+        cid, info, run_id, anon_claims, guidance_facts))
+    if ce:
+        for r in ce["_rejects"]:
+            log.event("rejected", company_id=cid, worker="counterevidence", detail=r)
+        for eid, meta in ce["_evidence"].items():
+            new = f"ce:{eid}"
+            merged["evidence"][new] = meta
+        challenges = [{**c, "eid": f"ce:{c['eid']}"} for c in ce["challenges"]]
+        log.event("challenges", company_id=cid, kept=len(challenges),
+                  severities=[c["severity"] for c in challenges])
+
     coverage = verify.coverage_report(
-        cid, {m["metric_id"]: m for m in info["metrics"]}, merged["facts"], merged["claims"]
+        cid, {m["metric_id"]: m for m in info["metrics"]}, merged["facts"],
+        merged["claims"], challenges,
     )
     log.event("coverage", company_id=cid, coverage=coverage["coverage"])
 
     outdir = config.OUT / cid / "research"
     outdir.mkdir(parents=True, exist_ok=True)
-    text = render_dossier(cid, info, merged)
+
+    # templated dossier first (always shippable), then prose overviews on top
+    text = render_dossier(cid, info, merged, challenges=challenges)
+    prose = await guarded("prose", prose_pass(cid, run_id, text))
+    if prose:
+        if prose["_dropped"]:
+            for d in prose["_dropped"]:
+                log.event("prose_dropped", company_id=cid, **d)
+        text = render_dossier(cid, info, merged, prose=prose, challenges=challenges)
     tmp = outdir / (config.DOSSIER_NAME + ".tmp")
     tmp.write_text(text)
     tmp.rename(outdir / config.DOSSIER_NAME)  # atomic
     with (outdir / config.CLAIMS_NAME).open("w") as fh:
         for c in merged["claims"]:
             e = merged["evidence"][c["eid"]]
-            fh.write(json.dumps({**c, "source": e["source"], "published_at": e["published_at"]},
-                                ensure_ascii=False) + "\n")
+            rec = {k: v for k, v in c.items() if k != "_lens"}
+            rec.update(lens=c.get("_lens", ""), source=e["source"],
+                       published_at=e["published_at"])
+            fh.write(json.dumps(rec, ensure_ascii=False) + "\n")
+        for ch in challenges:
+            e = merged["evidence"][ch["eid"]]
+            fh.write(json.dumps({**ch, "lens": "counterevidence", "source": e["source"],
+                                 "published_at": e["published_at"]}, ensure_ascii=False) + "\n")
     (outdir / config.COVERAGE_NAME).write_text(json.dumps(coverage, indent=2))
     log.event("dossier_written", company_id=cid, path=str(outdir / config.DOSSIER_NAME),
               chars=len(text), facts=len(merged["facts"]))

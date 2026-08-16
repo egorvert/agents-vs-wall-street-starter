@@ -181,22 +181,34 @@ def latest_guidance(facts: list[dict], evidence_by_eid: dict[str, Evidence]) -> 
     return latest
 
 
-def coverage_report(cid: str, metrics: dict, facts: list[dict], claims: list[dict]) -> dict:
-    """metric x dimension matrix. Dimensions: historical, guidance, drivers,
-    external, counterevidence. Stage A fills the first two; the rest report
-    honestly as missing until later stages run."""
+def coverage_report(cid: str, metrics: dict, facts: list[dict], claims: list[dict],
+                    challenges: list[dict] | None = None) -> dict:
+    """metric x dimension matrix — the personas.md completeness gate.
+    Dimensions: historical baseline, guidance, operating-driver bridge,
+    independent external corroboration, counterevidence."""
+    challenges = challenges or []
     report = {}
     for mid in metrics:
         historical = [f for f in facts if f["metric_id"] == mid and not f.get("is_guidance")]
         guidance = [f for f in facts if f["metric_id"] == mid and f.get("is_guidance")]
-        driver_claims = [c for c in claims if mid in c.get("metric_ids", []) and c.get("kind") == "inference"]
+        drivers = [c for c in claims if mid in c.get("metric_ids", [])
+                   and c.get("_lens") == "w3_operating_model"]
+        external = [c for c in claims if mid in c.get("metric_ids", [])
+                    and c.get("_lens") == "w4_demand_peers"]
+        # challenges name a claim, not a metric — map through the claims they attack
+        challenged = [
+            ch for ch in challenges
+            if any(mid in c.get("metric_ids", []) and c["claim"][:60] in ch["target_claim"]
+                   for c in claims)
+            or "guidance" in ch["target_claim"].casefold()
+        ]
         counter = [c for c in claims if mid in c.get("metric_ids", []) and c.get("counterevidence")]
         report[mid] = {
             "historical_points": len(historical),
             "historical_ok": len(historical) >= 8,   # 8+ where the corpus allows
             "guidance_present": bool(guidance),
-            "driver_claims": len(driver_claims),
-            "external_corroboration": False,          # Stage B/C
-            "counterevidence_present": bool(counter),
+            "driver_claims": len(drivers),
+            "external_corroboration": bool(external),
+            "counterevidence_present": bool(counter or challenged),
         }
     return {"company_id": cid, "coverage": report}

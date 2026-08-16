@@ -26,7 +26,8 @@ def _fact_line(f: dict, ev: dict, unit: str) -> str:
     }, ensure_ascii=False)
 
 
-def render_dossier(cid: str, info: dict, merged: dict) -> str:
+def render_dossier(cid: str, info: dict, merged: dict, prose: dict | None = None,
+                   challenges: list[dict] | None = None) -> str:
     metrics = {m["metric_id"]: m for m in info["metrics"]}
     ev = merged["evidence"]          # eid -> {source, published_at}
     facts = merged["facts"]          # verified, deduped
@@ -35,6 +36,12 @@ def render_dossier(cid: str, info: dict, merged: dict) -> str:
     gaps = merged["gaps"]
 
     reported = [f for f in facts if not f.get("is_guidance")]
+    # cap at the 10 most recent periods per metric — downstream needs 8+; beyond
+    # 10 the tokens are better spent on claims
+    by_mid: dict[str, list[dict]] = {}
+    for f in sorted(reported, key=lambda f: f["period"]):
+        by_mid.setdefault(f["metric_id"], []).append(f)
+    reported = [f for rows in by_mid.values() for f in rows[-10:]]
     guidance = [f for f in facts if f.get("is_guidance")]
     current_guidance = latest_guidance(facts, merged["evidence_objects"])
 
@@ -42,7 +49,13 @@ def render_dossier(cid: str, info: dict, merged: dict) -> str:
     L.append(f"# {info['company']} dossier — {cid} {info['period']}")
     L.append("")
 
+    def overview(key: str) -> None:
+        if prose and prose.get(key):
+            L.append(prose[key])
+            L.append("")
+
     L.append("## Basis and conventions")
+    overview("basis_overview")
     for mid, m in metrics.items():
         note = next((n for n in notes if n["metric_id"] == mid), None)
         line = f"- **{m['label']}** (`{mid}`, unit `{m['unit']}`, basis {m['basis']})."
@@ -54,6 +67,7 @@ def render_dossier(cid: str, info: dict, merged: dict) -> str:
     L.append("")
 
     L.append("## Historical figures")
+    overview("historical_overview")
     for mid, m in metrics.items():
         rows = sorted((f for f in reported if f["metric_id"] == mid), key=lambda f: f["period"])
         L.append(f"### {m['label']} (`{mid}`)")
@@ -61,13 +75,12 @@ def render_dossier(cid: str, info: dict, merged: dict) -> str:
             L.append("- No verified historical values extracted — see gaps below.")
         for f in rows:
             e = ev[f["eid"]]
-            L.append(
-                f"- {f['period']} ({f['period_type']}): **{f['value']} {m['unit']}** — "
-                f"\"{f['quote']}\" {_cite(e)}"
-            )
+            # verbatim quote lives once, in the fact block below — bullets stay lean
+            L.append(f"- {f['period']} ({f['period_type']}): **{f['value']} {m['unit']}** {_cite(e)}")
         L.append("")
 
     L.append("## Guidance")
+    overview("guidance_overview")
     if guidance:
         for mid, m in metrics.items():
             rows = [f for f in guidance if f["metric_id"] == mid]
@@ -87,6 +100,7 @@ def render_dossier(cid: str, info: dict, merged: dict) -> str:
     L.append("")
 
     L.append("## Segment / driver detail")
+    overview("driver_overview")
     drivers = [c for c in claims if c["kind"] == "inference" or c["direction"] != "unknown"]
     if drivers:
         for c in drivers:
@@ -102,13 +116,21 @@ def render_dossier(cid: str, info: dict, merged: dict) -> str:
     L.append("")
 
     L.append("## Risks and watch items")
+    overview("risk_overview")
+    for ch in (challenges or []):
+        e = ev[ch["eid"]]
+        L.append(
+            f"- **[challenge, {ch['severity']}]** vs \"{ch['target_claim'][:100]}\": "
+            f"{ch['rebuttal']} — \"{ch['quote']}\" {_cite(e)}"
+        )
     risky = [c for c in claims if c.get("counterevidence")]
     if risky:
         for c in risky:
             e = ev[c["eid"]]
+            # claim renders in full under drivers; here only its stub + the risk view
             L.append(
-                f"- ({e['published_at'] or 'undated'}) {c['claim']} "
-                f"Counterevidence: {c['counterevidence']} Falsifier: {c['falsifier']} {_cite(e)}"
+                f"- ({e['published_at'] or 'undated'}) re \"{c['claim'][:60]}…\" — "
+                f"counterevidence: {c['counterevidence']} Falsifier: {c['falsifier']}"
             )
     else:
         L.append("- No counterevidence-bearing claims verified yet.")
@@ -117,6 +139,8 @@ def render_dossier(cid: str, info: dict, merged: dict) -> str:
     L.append("")
 
     L.append("## Fact block")
+    L.append("Each historical figure above appears here with its verbatim source quote —")
+    L.append("downstream code parses only this block.")
     L.append("```jsonl")
     for f in sorted(reported, key=lambda f: (f["metric_id"], f["period"])):
         L.append(_fact_line(f, ev[f["eid"]], metrics[f["metric_id"]]["unit"]))
@@ -126,5 +150,6 @@ def render_dossier(cid: str, info: dict, merged: dict) -> str:
     text = "\n".join(L)
     # ~8k-token cap (4 chars/token): trim claim prose before ever touching facts
     if len(text) > config.DOSSIER_TOKEN_CAP * 4 and claims:
-        return render_dossier(cid, info, {**merged, "claims": claims[:-1]})
+        return render_dossier(cid, info, {**merged, "claims": claims[:-1]},
+                              prose=prose, challenges=challenges)
     return text
