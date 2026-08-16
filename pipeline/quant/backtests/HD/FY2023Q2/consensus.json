@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "company_id": "HD",
+  "retrieved_at": "2026-08-16T14:20:00+01:00",
+  "anchors": [
+    {
+      "metric_id": "hd_comp_sales",
+      "kind": "guidance_midpoint",
+      "value": -3.5,
+      "unit": "%",
+      "basis": "as-reported",
+      "source": "challenge/offline-data/home-depot/filings/2023-05-16__hd-us-20230516-q1-8k__101818.md",
+      "published_at": "2023-05-16",
+      "quote": "* Sales and comparable sales to decline between 2% and 5% compared to fiscal 2022",
+      "note": "Point-in-time reconstruction: midpoint of full-year guidance; no historical Q2 consensus in the corpus"
+    }
+  ]
+}

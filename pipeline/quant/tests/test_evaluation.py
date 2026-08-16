@@ -242,6 +242,7 @@ class EventAndSummaryTests(unittest.TestCase):
         self.assertEqual(summary.tie_rate_vs_proxy, 1 / 3)
         self.assertEqual(summary.capped_score_rate, 1 / 3)
         self.assertEqual(summary.missing_forecasts, 1)
+        self.assertEqual(summary.median_absolute_percentage_error, 7 / 110)
 
     def test_summary_rejects_mixed_configs_and_duplicate_metrics(self) -> None:
         first = metric_score(metric_id="one", actual=110.0, forecast=106.0, proxy=100.0)

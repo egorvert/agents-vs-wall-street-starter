@@ -76,6 +76,7 @@ class ConfigSummary:
     missing_forecasts: int
     invalid_forecasts: int
     mean_absolute_percentage_error: float | None
+    median_absolute_percentage_error: float | None
     range_coverage: float | None
     mean_range_width_in_floors: float | None
 
@@ -447,6 +448,7 @@ def summarize_config(evaluations: Sequence[MetricEvaluation]) -> ConfigSummary:
         missing_forecasts=sum(item.status == "missing_forecast" for item in evaluations),
         invalid_forecasts=sum(item.status == "invalid_forecast" for item in evaluations),
         mean_absolute_percentage_error=fmean(apes) if apes else None,
+        median_absolute_percentage_error=median(apes) if apes else None,
         range_coverage=(
             sum(bool(item.actual_in_range) for item in ranged) / len(ranged) if ranged else None
         ),

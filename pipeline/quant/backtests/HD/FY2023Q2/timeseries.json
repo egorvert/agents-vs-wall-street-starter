@@ -1,0 +1,92 @@
+{
+  "schema_version": 1,
+  "company_id": "HD",
+  "series": [
+    {
+      "metric_id": "hd_net_sales",
+      "unit": "USDm",
+      "basis": "as-reported",
+      "period_type": "Q",
+      "points": [
+        {
+          "period": "FY2018Q2",
+          "value": 30463.0,
+          "source": "challenge/offline-data/home-depot/filings/2018-08-14__hd-us-20180814-q2-10q__437634.md",
+          "published_at": "2018-08-14",
+          "quote": "| Net sales         | $ 30,463         | $ 28,108         | $ 55,410         | $ 51,995         |"
+        },
+        {
+          "period": "FY2019Q2",
+          "value": 30839.0,
+          "source": "challenge/offline-data/home-depot/filings/2019-08-20__hd-us-20190820-q2-10q__437627.md",
+          "published_at": "2019-08-20",
+          "quote": "| Net sales         | $ 30,839         | $ 30,463         | $ 57,220         | $ 55,410         |"
+        },
+        {
+          "period": "FY2020Q2",
+          "value": 38053.0,
+          "source": "challenge/offline-data/home-depot/filings/2020-08-17__hd-us-20200817-q2-10q__101839.md",
+          "published_at": "2020-08-17",
+          "quote": "| Net sales         | $ 38,053         | $ 30,839         | $ 66,313         | $ 57,220         |"
+        },
+        {
+          "period": "FY2021Q2",
+          "value": 41118.0,
+          "source": "challenge/offline-data/home-depot/filings/2021-08-17__hd-us-20210817-q2-10q__101831.md",
+          "published_at": "2021-08-17",
+          "quote": "| Net sales         | $ 41,118         | $ 38,053         | $ 78,618         | $ 66,313         |"
+        },
+        {
+          "period": "FY2022Q2",
+          "value": 43792.0,
+          "source": "challenge/offline-data/home-depot/filings/2022-08-16__hd-us-20220816-q2-10q__101824.md",
+          "published_at": "2022-08-16",
+          "quote": "| Net sales         | $ 43,792         | $ 41,118         | $ 82,700         | $ 78,618         |"
+        }
+      ]
+    },
+    {
+      "metric_id": "hd_comp_sales",
+      "unit": "%",
+      "basis": "as-reported",
+      "period_type": "Q",
+      "points": [
+        {
+          "period": "FY2018Q2",
+          "value": 8.0,
+          "source": "challenge/offline-data/home-depot/filings/2018-08-14__hd-us-20180814-q2-8k__437595.md",
+          "published_at": "2018-08-14",
+          "quote": "Comparable sales for the second quarter of fiscal 2018 were positive 8.0 percent"
+        },
+        {
+          "period": "FY2019Q2",
+          "value": 3.0,
+          "source": "challenge/offline-data/home-depot/filings/2019-08-20__hd-us-20190820-q2-8k__437585.md",
+          "published_at": "2019-08-20",
+          "quote": "Comparable sales for the second quarter of fiscal 2019 were positive 3.0 percent"
+        },
+        {
+          "period": "FY2020Q2",
+          "value": 23.4,
+          "source": "challenge/offline-data/home-depot/filings/2020-08-17__hd-us-20200817-q2-8k__101842.md",
+          "published_at": "2020-08-17",
+          "quote": "Comparable sales for the second quarter of fiscal 2020 were positive 23.4 percent"
+        },
+        {
+          "period": "FY2021Q2",
+          "value": 4.5,
+          "source": "challenge/offline-data/home-depot/filings/2021-08-17__hd-us-20210817-q2-8k__101848.md",
+          "published_at": "2021-08-17",
+          "quote": "Comparable sales for the second quarter of fiscal 2021 increased 4.5 percent"
+        },
+        {
+          "period": "FY2022Q2",
+          "value": 5.8,
+          "source": "challenge/offline-data/home-depot/filings/2022-08-16__hd-us-20220816-q2-8k__101829.md",
+          "published_at": "2022-08-16",
+          "quote": "Comparable sales for the second quarter of fiscal 2022 increased 5.8 percent"
+        }
+      ]
+    }
+  ]
+}

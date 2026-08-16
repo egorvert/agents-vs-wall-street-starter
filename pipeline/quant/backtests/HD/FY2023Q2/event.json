@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "event_id": "HD-FY2023Q2",
+  "company_id": "HD",
+  "target_period": "FY2023Q2",
+  "as_of": "2023-08-14",
+  "actuals": [
+    {
+      "metric_id": "hd_net_sales",
+      "value": 42916.0,
+      "unit": "USDm",
+      "basis": "as-reported",
+      "source": "challenge/offline-data/home-depot/filings/2023-08-15__hd-us-20230815-q2-10q__101816.md",
+      "published_at": "2023-08-15",
+      "quote": "| Net sales         | $ 42,916         | $ 43,792         | $ 80,173         | $ 82,700         |"
+    },
+    {
+      "metric_id": "hd_comp_sales",
+      "value": -2.0,
+      "unit": "%",
+      "basis": "as-reported",
+      "source": "challenge/offline-data/home-depot/filings/2023-08-15__hd-us-20230815-q2-8k__101814.md",
+      "published_at": "2023-08-15",
+      "quote": "Comparable sales for the second quarter of fiscal 2023 decreased 2.0%"
+    }
+  ]
+}

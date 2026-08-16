@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "company_id": "HD",
+  "retrieved_at": "2026-08-16T14:20:00+01:00",
+  "anchors": [
+    {
+      "metric_id": "hd_comp_sales",
+      "kind": "guidance_midpoint",
+      "value": -1.0,
+      "unit": "%",
+      "basis": "as-reported",
+      "source": "challenge/offline-data/home-depot/filings/2024-05-14__hd-us-20240514-q1-8k__101830.md",
+      "published_at": "2024-05-14",
+      "quote": "- Comparable sales to decline approximately 1.0% for the 52-week period",
+      "note": "Point-in-time reconstruction: full-year guidance used as proxy; no historical Q2 consensus in the corpus"
+    }
+  ]
+}
