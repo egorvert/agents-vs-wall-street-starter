@@ -36,12 +36,25 @@ def render_dossier(cid: str, info: dict, merged: dict, prose: dict | None = None
     gaps = merged["gaps"]
 
     reported = [f for f in facts if not f.get("is_guidance")]
-    # cap at the 10 most recent periods per metric — downstream needs 8+; beyond
-    # 10 the tokens are better spent on claims
+    # cap at 10 periods per metric — downstream needs 8+; beyond that the tokens
+    # are better spent on claims. Comparable-with-target periods (same quarter
+    # suffix, e.g. Q2 for an FY2026Q2 target) are kept preferentially: they are
+    # what the seasonal-naive fallback and Rachel's extractor need most.
+    target_suffix = info["period"][-2:] if info["period_type"] == "Q" else ""
     by_mid: dict[str, list[dict]] = {}
     for f in sorted(reported, key=lambda f: f["period"]):
         by_mid.setdefault(f["metric_id"], []).append(f)
-    reported = [f for rows in by_mid.values() for f in rows[-10:]]
+    capped = []
+    for rows in by_mid.values():
+        if target_suffix:
+            comparable = [f for f in rows if f["period"].endswith(target_suffix)][-10:]
+            rest = [f for f in rows if not f["period"].endswith(target_suffix)]
+            budget = 10 - len(comparable)
+            keep = comparable + (rest[-budget:] if budget > 0 else [])
+        else:
+            keep = rows[-10:]
+        capped.extend(sorted(keep, key=lambda f: f["period"]))
+    reported = capped
     guidance = [f for f in facts if f.get("is_guidance")]
     current_guidance = latest_guidance(facts, merged["evidence_objects"])
 
