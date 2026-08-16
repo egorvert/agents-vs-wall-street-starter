@@ -5,3 +5,5 @@ Treat the supplied metric conventions as closed definitions and use only supplie
 Prefer comparable historical periods and current-year reported periods. If the dossier and another source disagree for the same metric and period, do not resolve the conflict by guessing. Code supplies unit, basis, source, date, and quote.
 
 Hard citation rule: only emit a fact if its exact numeric value appears inside the chosen evidence quote (with or without thousands separators, at the stated scale). If a prior-year comparative value is not present in the quote, do not emit it as a fact.
+
+Period integrity: never emit two facts for the same metric and period. A half-year (H1/H2) value covers exactly two quarters; nine-month or year-to-date figures are NOT half-years — skip YTD aggregates entirely.
