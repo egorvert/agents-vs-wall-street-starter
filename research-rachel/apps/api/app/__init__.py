@@ -1,1 +1,0 @@
-"""Hackathon starter API package."""
