@@ -102,7 +102,7 @@ def resolve_finals(cid: str, root: Path) -> dict:
 
 # ---------------------------------------------------------------------- stages
 
-def run_company(cid: str, stub: bool) -> None:
+def run_company(cid: str, stub: bool, cached: bool = False) -> None:
     root = OUT / cid
     log(f"=== {cid} start (stub={stub}) ===")
 
@@ -123,6 +123,8 @@ def run_company(cid: str, stub: bool) -> None:
             (root / "final.json").write_text(json.dumps(
                 {"schema_version": 1, "company_id": cid, "finals": stub_finals}, indent=2))
     else:
+        import os
+
         from research.config import CUTOFF_DATE
 
         def stage(name: str, cmd: list[str]) -> bool:
@@ -135,19 +137,25 @@ def run_company(cid: str, stub: bool) -> None:
                     f"fallback chain will cover missing artifacts")
             return r.returncode == 0
 
+        # Real runs are LIVE by team decision: every model call is made fresh,
+        # no cached generations. --cached is a dev-iteration escape hatch only.
+        no_cache = [] if cached else ["--no-cache"]
+        os.environ["RESEARCH_CACHE"] = "rw" if cached else "off"
+        log(f"{cid}: mode={'cached (dev only)' if cached else 'LIVE — all model calls fresh'}")
+
         # 🔴 research swarm -> out/<cid>/research/dossier.md
         from research.swarm import amain as research_main
         if asyncio.run(research_main([cid])) != 0:
             log(f"{cid}: research swarm failed — downstream stages may fall back")
         # 🟢 analysis -> out/<cid>/analysis/* + consensus.json
-        stage("analysis 🟢", [sys.executable, "-m", "pipeline.analysis", "--company", cid])
-        # 🔵 quant -> out/<cid>/timeseries.json + ranges.json
+        stage("analysis 🟢", [sys.executable, "-m", "pipeline.analysis", "--company", cid] + no_cache)
+        # 🔵 quant -> out/<cid>/timeseries.json + ranges.json  (deterministic, no LLM)
         stage("quant:timeseries 🔵", [sys.executable, "-m", "pipeline.quant.extract_timeseries",
                                       "--company", cid, "--as-of", CUTOFF_DATE])
         stage("quant:ranges 🔵", [sys.executable, "-m", "pipeline.quant.build_ranges",
                                   "--company", cid, "--as-of", CUTOFF_DATE])
         # 🟠 combine -> out/<cid>/final.json
-        stage("combine 🟠", [sys.executable, "-m", "pipeline.combine", "--company", cid])
+        stage("combine 🟠", [sys.executable, "-m", "pipeline.combine", "--company", cid] + no_cache)
 
     try:
         resolved = resolve_finals(cid, root)
@@ -179,11 +187,13 @@ def main() -> None:
     g.add_argument("--company", choices=COMPANIES)
     g.add_argument("--all", action="store_true")
     ap.add_argument("--stub", action="store_true", help="run from fixtures/placeholders")
+    ap.add_argument("--cached", action="store_true",
+                    help="dev iteration only: reuse cached model calls (real runs are live)")
     args = ap.parse_args()
 
     targets = COMPANIES if args.all else (args.company,)
     for cid in targets:
-        run_company(cid, stub=args.stub)
+        run_company(cid, stub=args.stub, cached=args.cached)
     log(f"done: {len(targets)} company(ies) -> submission/")
 
 
